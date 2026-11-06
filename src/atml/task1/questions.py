@@ -24,13 +24,19 @@ def native_records(raw):
         question_id, fmt = source_id, "plain"
         for suffix in ("_json", "_template"):
             if source_id.endswith(suffix):
-                question_id, fmt = source_id[:-len(suffix)], suffix[1:]
+                question_id, fmt = source_id[: -len(suffix)], suffix[1:]
                 break
         prompts = row["paraphrases"]
         if not isinstance(prompts, list) or len(prompts) != 1:
-            raise ValueError("Expected one supplied prompt per record (24 total); do not sample paraphrases.")
-        record = {"question_id": question_id, "format": fmt,
-                  "prompt": prompts[0], "source_id": source_id}
+            raise ValueError(
+                "Expected one supplied prompt per record (24 total); do not sample paraphrases."
+            )
+        record = {
+            "question_id": question_id,
+            "format": fmt,
+            "prompt": prompts[0],
+            "source_id": source_id,
+        }
         if "system" in row:
             if not isinstance(row["system"], str):
                 raise ValueError("The supplied system instruction must be a string.")
@@ -75,5 +81,9 @@ def download_questions(destination: Path):
         temporary = destination.with_suffix(".yaml.download")
         temporary.write_bytes(content)
         temporary.replace(destination)
-    return {"url": QUESTION_URL, "sha256": hashlib.sha256(content).hexdigest(),
-            "bytes": len(content), "kind": "Assignment-linked question data; no implementation code"}
+    return {
+        "url": QUESTION_URL,
+        "sha256": hashlib.sha256(content).hexdigest(),
+        "bytes": len(content),
+        "kind": "Assignment-linked question data; no implementation code",
+    }

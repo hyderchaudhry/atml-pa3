@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
+
+import torch
+from transformers import StoppingCriteria, StoppingCriteriaList
 
 from lm_eval.models.huggingface import HFLM
 from lm_eval.tasks import TaskManager
+from lm_eval.models.utils import stop_sequences_criteria
 
-from atml.common.io import append_jsonl, read_json, write_json
+from atml.common.io import append_jsonl_many, read_json, recover_jsonl, write_json
 from atml.task1.config import BENCHMARKS, DATASETS
+from atml.task1.generation import generation_record, token_key
 
 
 def fixed_tasks(paths):
@@ -54,44 +58,101 @@ def fixed_tasks(paths):
     return tasks
 
 
-def token_key(tokens):
-    return hashlib.sha256(json.dumps(tokens, separators=(",", ":")).encode()).hexdigest()
+class PerRowStockStops(StoppingCriteria):
+    """Use the pinned harness's exact matchers, ending each row independently."""
+
+    def __init__(self, tokenizer, stops, width, size):
+        # Transfer one shared, bounded generated-token suffix to CPU per step.
+        # The stock matchers then decode their own exact lookback windows from it.
+        # Prompt tokens never enter those windows, even on the first decode step.
+        self.criteria = stop_sequences_criteria(tokenizer, stops, 0, size)
+        if any(not hasattr(criterion, "sequence_id_len") for criterion in self.criteria):
+            raise RuntimeError("Pinned harness stopping API changed; run smoke first.")
+        self.lookback = max((criterion.sequence_id_len for criterion in self.criteria), default=1)
+        self.width = width
+        self.size = size
+
+    def __call__(self, input_ids, scores, **kwargs):
+        done = [False] * self.size
+        suffix = input_ids[:, self.width :][:, -self.lookback :].cpu()
+        for criterion in self.criteria:
+            criterion(suffix, scores, **kwargs)
+            if not hasattr(criterion, "done_tracker"):
+                raise RuntimeError("Pinned harness stopping API changed; run smoke first.")
+            done = [a or b for a, b in zip(done, criterion.done_tracker, strict=True)]
+        return torch.tensor(done, dtype=torch.bool, device=input_ids.device)
 
 
 class RecordedHFLM(HFLM):
-    """Keep the harness's generation/stopping logic and record actual token caps.
+    """Stock scoring/batching plus per-row stopping, evidence and request recovery."""
 
-    Generation uses batch size one so EOS/padding cannot make token lengths
-    ambiguous. Raw token records are flushed immediately for durable evidence.
-    """
-
-    def __init__(self, *args, token_output, **kwargs):
+    def __init__(self, *args, token_output, journal=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.token_output = token_output
-        self.generation_records = {}
+        self.generation_records = {
+            row["prompt_token_key"]: row for row in recover_jsonl(token_output)
+        }
+        self.journal = journal
+        if journal is not None:
+            self.cache_hook = journal
+
+    def generate_until(self, requests, **kwargs):
+        def execute(missing):
+            return super(RecordedHFLM, self).generate_until(missing, **kwargs)
+
+        return (
+            self.journal.run("generate_until", requests, execute)
+            if self.journal
+            else execute(requests)
+        )
+
+    def loglikelihood(self, requests, **kwargs):
+        def execute(missing):
+            return super(RecordedHFLM, self).loglikelihood(missing, **kwargs)
+
+        return (
+            self.journal.run("loglikelihood", requests, execute)
+            if self.journal
+            else execute(requests)
+        )
+
+    def _loglikelihood_tokens(self, requests, disable_tqdm=False, override_bs=None):
+        from atml.task1.likelihood import continuation_scores
+
+        return continuation_scores(self, requests, disable_tqdm, override_bs)
 
     def _model_generate(self, context, max_length, stop, **generation_kwargs):
-        generated = super()._model_generate(context, max_length, stop, **generation_kwargs)
-        if context.shape[0] != 1:
-            raise ValueError("Token evidence recording requires generation batch size one.")
-        inputs = context[0].tolist()
-        output = generated[0, context.shape[1] :].tolist()
-        raw_text = self.tokenizer.decode(output, skip_special_tokens=False)
+        if generation_kwargs.get("do_sample", False):
+            raise ValueError("Task 1 generation must remain greedy.")
+        for key in ("temperature", "top_p", "top_k"):
+            generation_kwargs.pop(key, None)
+        mask = generation_kwargs.get("attention_mask")
+        if mask is None:
+            raise ValueError("Batched evidence requires the explicit prompt attention mask.")
+        criteria = PerRowStockStops(self.tokenizer, stop, context.shape[1], context.shape[0])
+        with torch.inference_mode():
+            generated = self.model.generate(
+                input_ids=context,
+                max_length=max_length,
+                stopping_criteria=StoppingCriteriaList([criteria]),
+                pad_token_id=self.tokenizer.pad_token_id,
+                use_cache=True,
+                **generation_kwargs,
+            )
+        inputs = context.cpu().tolist()
+        masks = mask.cpu().tolist()
+        outputs = generated[:, context.shape[1] :].cpu().tolist()
         cap = max_length - context.shape[1]
         eos = self.model.generation_config.eos_token_id
-        eos = eos if isinstance(eos, list) else [eos]
-        stopped = any(token in eos for token in output) or any(s and s in raw_text for s in stop)
-        record = {
-            "input_ids": inputs,
-            "output_ids": output,
-            "input_tokens": len(inputs),
-            "output_tokens": len(output),
-            "new_token_cap": cap,
-            "truncated": len(output) >= cap and not stopped,
-            "stock_stops": stop,
-            "raw_text": raw_text,
-            "prompt_token_key": token_key(inputs),
-        }
-        self.generation_records[token_key(inputs)] = record
-        append_jsonl(self.token_output, record)
+        records = []
+        for padded, valid, output in zip(inputs, masks, outputs, strict=True):
+            prompt = [token for token, keep in zip(padded, valid, strict=True) if keep]
+            record = generation_record(self.tokenizer, prompt, output, cap, eos, stop)
+            record["execution_batch_size"] = context.shape[0]
+            self.generation_records[token_key(prompt)] = record
+            records.append(record)
+        # Token evidence is committed before the harness can cache decoded text.
+        append_jsonl_many(self.token_output, records)
+        if self.journal:
+            self.journal.begin_batch(context.shape[0])
         return generated

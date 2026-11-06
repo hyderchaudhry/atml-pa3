@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import collections
 import shutil
+import tempfile
 import unicodedata
 from pathlib import Path
 
 import numpy as np
 import torch
 import yaml
-from datasets import Dataset, load_dataset
+from datasets import Dataset, load_dataset, load_from_disk
 from huggingface_hub import HfApi
 from transformers import AutoTokenizer
 
@@ -131,7 +132,11 @@ def import_questions(source: Path, output: Path, mapping: Path | None = None) ->
             value = raw
             for key in row["path"]:
                 value = value[key]
-            record = {"question_id": str(row["question_id"]), "format": row["format"], "prompt": value}
+            record = {
+                "question_id": str(row["question_id"]),
+                "format": row["format"],
+                "prompt": value,
+            }
             if "system_path" in row:
                 system = raw
                 for key in row["system_path"]:
@@ -186,15 +191,19 @@ def prepare(paths: Paths) -> None:
     from atml.task1.harness import fixed_tasks
 
     manifest = paths.evidence / "preparation.json"
-    if manifest.exists() or paths.prepared.exists():
-        raise FileExistsError(
-            "Preparation already exists. Reuse it; use separate directories for a new protocol."
-        )
+    if manifest.exists():
+        verify_preparation(paths)
+        return
     api = HfApi()
-    revisions = {key: api.dataset_info(repo).sha for key, repo in DATASETS.items()}
-    lock = {"model": api.model_info(RECIPE.model).sha, "datasets": revisions}
     paths.evidence.mkdir(parents=True, exist_ok=True)
-    write_json(paths.evidence / "asset_lock.json", lock)
+    lock_path = paths.evidence / "asset_lock.json"
+    if lock_path.exists():
+        lock = read_json(lock_path)  # An interrupted preparation keeps its original revisions.
+    else:
+        revisions = {key: api.dataset_info(repo).sha for key, repo in DATASETS.items()}
+        lock = {"model": api.model_info(RECIPE.model).sha, "datasets": revisions}
+        write_json(lock_path, lock)
+    revisions = lock["datasets"]
     tokenizer = AutoTokenizer.from_pretrained(RECIPE.model, revision=lock["model"], use_fast=True)
     tokenizer.save_pretrained(paths.artifacts / "tokenizer")
     gsm = load_dataset(DATASETS["gsm8k"], "main", split="test", revision=revisions["gsm8k"])
@@ -202,7 +211,16 @@ def prepare(paths: Paths) -> None:
         DATASETS["metamath"], split="train", revision=revisions["metamath"], streaming=True
     )
     rows, ids, counts = select_training(source, gsm["question"], tokenizer)
-    Dataset.from_list(rows).save_to_disk(str(paths.prepared))
+    prepared = Dataset.from_list(rows)
+    if paths.prepared.exists():
+        if load_from_disk(str(paths.prepared)).to_dict() != prepared.to_dict():
+            raise ValueError("Unfinished preparation has different tokenized examples.")
+    else:
+        paths.artifacts.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix="prepared-staging-", dir=paths.artifacts) as temp:
+            staged = Path(temp) / "prepared"
+            prepared.save_to_disk(str(staged))
+            staged.rename(paths.prepared)
     write_json(paths.evidence / "training_ids.json", ids)
     tasks = fixed_tasks(paths)
     rng = np.random.default_rng(RECIPE.seed)

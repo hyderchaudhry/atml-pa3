@@ -47,18 +47,58 @@ def read_json(path: Path):
 
 
 def append_jsonl(path: Path, row) -> None:
+    append_jsonl_many(path, [row])
+
+
+def append_jsonl_many(path: Path, rows) -> None:
+    """Commit one completed batch with one fsync, retaining every example."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as stream:
-        stream.write(
-            json.dumps(row, ensure_ascii=False, default=json_default, allow_nan=False) + "\n"
-        )
+        for row in rows:
+            stream.write(
+                json.dumps(row, ensure_ascii=False, default=json_default, allow_nan=False) + "\n"
+            )
         stream.flush()
         os.fsync(stream.fileno())
+
+
+def write_jsonl(path: Path, rows) -> None:
+    """Atomically replace a complete journal/table, leaving the prior file on failure."""
+    temporary = path.with_name(path.name + ".rewrite_tmp")
+    temporary.parent.mkdir(parents=True, exist_ok=True)
+    temporary.write_text("", encoding="utf-8")
+    append_jsonl_many(temporary, rows)
+    temporary.replace(path)
 
 
 def read_jsonl(path: Path) -> list[dict]:
     with path.open(encoding="utf-8") as stream:
         return [json.loads(line) for line in stream if line.strip()]
+
+
+def recover_jsonl(path: Path) -> list[dict]:
+    """Recover only an incomplete final write; never silently skip corrupt records."""
+    if not path.exists():
+        return []
+    raw = path.read_bytes()
+    lines = raw.splitlines(keepends=True)
+    rows, committed = [], 0
+    for index, line in enumerate(lines):
+        try:
+            row = json.loads(line)
+        except (ValueError, UnicodeDecodeError):
+            if index != len(lines) - 1 or line.endswith(b"\n"):
+                raise ValueError(f"Corrupt committed JSONL record in {path}:{index + 1}") from None
+            path.with_name(path.name + ".crash_tail").write_bytes(line)
+            with path.open("r+b") as stream:
+                stream.truncate(committed)
+            break
+        rows.append(row)
+        committed += len(line)
+    if rows and path.stat().st_size and not path.read_bytes().endswith(b"\n"):
+        with path.open("ab") as stream:
+            stream.write(b"\n")
+    return rows
 
 
 def sha256(path: Path) -> str:

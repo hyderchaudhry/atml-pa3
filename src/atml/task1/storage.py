@@ -16,7 +16,13 @@ from huggingface_hub.utils import HfHubHTTPError
 from atml.common.io import read_json, sha256, write_json
 from atml.task1.config import METHODS, RECIPE
 
-SHARED_PATTERNS = ["prepared/**", "tokenizer/**", "bases.pt", "baseline_activations.pt"]
+SHARED_PATTERNS = [
+    "prepared/**",
+    "tokenizer/**",
+    "bases.pt",
+    "baseline_activations.pt",
+    "basis_parts/**",
+]
 
 
 def file_record(path):
@@ -57,7 +63,9 @@ def latest_checkpoint(paths, method):
 def private_api(repo):
     token = get_token()
     if not token:
-        raise RuntimeError("HF_TOKEN is missing. Run the guide's authentication cell in this Kaggle kernel first.")
+        raise RuntimeError(
+            "HF_TOKEN is missing. Run the guide's authentication cell in this Kaggle kernel first."
+        )
     api = HfApi(token=token.strip())
     try:
         api.whoami()
@@ -135,6 +143,9 @@ def archive_checkpoint(paths, method, update, repo, offload=False):
             return
         raise FileNotFoundError(target)
     started = time.perf_counter()
+    from atml.task1.training import reconcile_checkpoint_evidence
+
+    reconcile_checkpoint_evidence(paths, method, update)
     api = private_api(repo)
     files = inventory(target)
     prefix = f"checkpoints/{method}/update_{update:04d}"
@@ -217,6 +228,14 @@ def ensure_checkpoint(paths, method, update, needed=None):
         "adapter.pt" if METHODS[method].rank else "model.pt",
     ]
     if all((target / name).exists() for name in required):
+        receipt = archive_path(paths, method, update)
+        if receipt.exists():
+            record = read_json(receipt)
+            if not record.get("verified"):
+                raise ValueError("Checkpoint archive receipt is not verified.")
+            for name in required:
+                if sha256(target / name) != record["files"][name]["sha256"]:
+                    raise ValueError(f"Local checkpoint differs from verified backup: {name}")
         return target
     record = read_json(archive_path(paths, method, update))
     if not record.get("verified"):
@@ -241,6 +260,15 @@ def backup(paths, repo, offload=False):
     for root in (paths.prepared, paths.artifacts / "tokenizer"):
         if root.exists():
             files.update({f"{root.name}/{name}": value for name, value in inventory(root).items()})
+    partial = paths.artifacts / "basis_parts"
+    if partial.exists():
+        files.update(
+            {
+                f"basis_parts/{name}": value
+                for name, value in inventory(partial).items()
+                if not name.endswith(".tmp")
+            }
+        )
     for name in ("bases.pt", "baseline_activations.pt"):
         if (paths.artifacts / name).exists():
             files[name] = file_record(paths.artifacts / name)

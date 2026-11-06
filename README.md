@@ -6,6 +6,18 @@ Task 1 is implemented. Tasks 2 and 3 are intentionally not implemented. The trai
 
 **Kaggle:** follow the [copy-and-paste guide](docs/kaggle.md): clone/install, set your backup name, then run `bash scripts/kaggle.sh run`. The launcher downloads the assignment-linked questions, chooses the remaining steps, and restores saved progress automatically. No notebook files or attached input datasets are needed for Task 1, and the training/evaluation recipe stays fixed.
 
+The [ordered Task 1 checklist](docs/task1_execution.md) provides exact commands for
+all five training variants, seven benchmark/qualitative conditions, six diagnostic
+conditions and every expected output path. The [implementation audit](docs/task1_audit.md)
+records the manual review, fixes and checks that still require your Kaggle runs.
+
+Evaluation now defaults to **batch 32**, with padding-aware per-example token
+evidence, independent stock stopping, SDPA attention, KV caching and resumable
+request journals. Likelihood scoring projects only continuation hidden states in
+bounded chunks and shares identical prefixes, retaining the harness's tokenization
+and scoring semantics. Training remains **microbatch 2 × accumulation 16**.
+T4 performance is unmeasured until you run it; no speedup or benchmark score is claimed.
+
 Kaggle setup selects an installed CPython 3.10–3.12 or uses uv to install isolated Python 3.11 under scratch space when the notebook's default Python is newer. It leaves the notebook kernel and pinned experiment dependencies unchanged.
 
 ## Install
@@ -21,6 +33,7 @@ export HF_HOME="$PWD/artifacts/hf-cache"
 export MPLCONFIGDIR="$PWD/artifacts/matplotlib-cache"
 export TOKENIZERS_PARALLELISM=false
 atml-task1 protocol
+atml-task1 smoke
 ```
 
 Dependencies are pinned in [requirements.txt](requirements.txt). Each preparation, training run, and evaluation also saves the installed package versions, platform/GPU details, source hashes, and Git revision. Model and dataset commit revisions are resolved once during preparation and reused. Keep one environment for all five variants and seven evaluation conditions.
@@ -89,7 +102,11 @@ atml-task1 summarize
 atml-task1 audit
 ```
 
-`evaluate` skips completed conditions and completed benchmark splits; the unchanged baseline is evaluated only once. It keeps interrupted per-example output separately when rerunning an incomplete split. Qualitative generation resumes from already saved prompts. `diagnose --condition all` handles the six trained conditions; it does not invent an update for the baseline.
+`evaluate` skips completed conditions and completed benchmark splits; the unchanged
+baseline is evaluated only once. An interrupted split replays its completed request
+journal and runs only missing requests, then computes stock metrics over the full
+split. Qualitative generation resumes from saved prompts. `diagnose --condition all`
+handles the six trained conditions; the baseline has no update diagnostic.
 
 The seven condition names are `baseline`, `full_ft_midpoint`, `full_ft_final`, `l2sp_final`, `lora4_final`, `lora16_final`, and `oplora16_final`. You may select one with `--condition`.
 
@@ -101,7 +118,27 @@ Checkpoints are saved at updates 312, 625, 937, and 1250 (9,984; 20,000; 29,984;
 atml-task1 train --method full_ft --resume artifacts/task1/checkpoints/full_ft/update_0625
 ```
 
-Resume revalidates the fixed protocol, starting assets, and prepared-data manifest. Any training log tail after the checkpoint is archived and removed from the active learning curve. If a save was interrupted, preserve or move its `.incomplete` directory before retrying that checkpoint. A run interrupted before its first checkpoint has no resumable optimizer state; preserve/move its partial run directory and restart from the original checkpoint.
+Resume revalidates the fixed protocol, starting assets, and prepared-data manifest.
+Any training log tail after the checkpoint is archived and removed atomically from
+the active learning curve. An interrupted `.incomplete` serialization is discarded
+when retrying that save; complete checkpoints are never overwritten. With
+`--resume-latest`, an interruption before the first checkpoint preserves the attempt's
+curve and restarts from the original seed because no optimizer state was saved yet.
+Existing runs retain their recorded attention backend, including eager attention
+for checkpoints from the earlier implementation.
+
+Run `atml-task1 smoke` locally or `!bash scripts/kaggle.sh smoke --cuda` on Kaggle.
+The offline synthetic checks use tiny random models and artificial inputs, clean
+their fixtures automatically, and save only `evidence/task1/system/smoke.json`.
+This evidence verifies implementation behavior; it is not experimental evidence.
+The separate `memory-check` command checks the real model's maximum-length memory
+on your GPU without retaining its synthetic training step.
+
+AMP overflow now retries the same effective batch with its reduced scale and
+restored dropout RNG, so checkpoints count applied updates. If an older run already
+advanced past skipped updates, it must be restarted to meet the exact 1,250-update
+budget. Its saved evidence should be retained separately; the new audit detects
+the shortfall instead of treating it as a complete experiment.
 
 `run` resumes the latest complete recovery checkpoint automatically and skips completed final runs. It does not delete or overwrite complete checkpoints. Keep both `artifacts/task1` and `evidence/task1` on persistent storage, especially on a rented GPU or notebook runtime. To use another location, put global options **before** the subcommand, consistently on every command:
 

@@ -7,7 +7,7 @@ import time
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from atml.common.io import read_json, require_cuda, sha256, tree_bytes, write_json
+from atml.common.io import read_json, require_cuda, seed_all, sha256, tree_bytes, write_json
 from atml.task1.adapters import (
     AdapterLinear,
     compute_bases,
@@ -18,43 +18,73 @@ from atml.task1.adapters import (
 )
 from atml.task1.config import CONDITIONS, METHODS, RECIPE
 from atml.task1.storage import ensure_checkpoint
+from atml.task1.runtime import Runtime, ProgressBackup
 
 
 def tokenizer_for(paths):
     return AutoTokenizer.from_pretrained(paths.artifacts / "tokenizer", use_fast=True)
 
 
-def starting_model(paths, dtype=torch.float32, device="cpu"):
+def starting_model(paths, dtype=torch.float32, device="cpu", attention=None):
     revision = read_json(paths.evidence / "asset_lock.json")["model"]
     model = AutoModelForCausalLM.from_pretrained(
         RECIPE.model,
         revision=revision,
         torch_dtype=dtype,
-        attn_implementation="eager",
+        attn_implementation=attention or Runtime.current().attention,
     )
     return model.to(device)
 
 
 def build_bases(paths):
     device = require_cuda()
+    seed_all(RECIPE.seed)
     destination = paths.artifacts / "bases.pt"
-    if destination.exists():
+    if destination.exists() and (paths.evidence / "bases.json").exists():
         load_basis_cache(paths)
         return
     started = time.perf_counter()
     model = starting_model(paths, torch.float32, device)
     bases = {}
     timings = {}
+    partial = paths.artifacts / "basis_parts"
+    partial.mkdir(parents=True, exist_ok=True)
+    scope = {
+        "model": read_json(paths.evidence / "asset_lock.json")["model"],
+        "rank": RECIPE.protection_rank,
+        "algorithm": "exact reduced FP32 SVD",
+    }
+    scope_path = partial / "scope.json"
+    if scope_path.exists() and read_json(scope_path) != scope:
+        raise ValueError("Partial SVD cache belongs to different starting weights/settings.")
+    write_json(scope_path, scope)
+    progress = ProgressBackup(paths, shared=True)
     targets = target_modules(model)
     for index, (name, layer) in enumerate(targets, start=1):
+        part = partial / f"{name}.pt"
+        metadata = part.with_suffix(".json")
+        if part.exists() and metadata.exists():
+            record = read_json(metadata)
+            if record["sha256"] != sha256(part):
+                raise ValueError(f"Partial SVD cache changed: {name}")
+            bases[name] = torch.load(part, map_location="cpu", weights_only=True)
+            timings[name] = record["seconds"]
+            continue
         torch.cuda.synchronize()
         tick = time.perf_counter()
         bases[name] = compute_bases(layer.weight, RECIPE.protection_rank)
         torch.cuda.synchronize()
         timings[name] = time.perf_counter() - tick
+        temporary = part.with_suffix(".tmp")
+        torch.save(bases[name], temporary)
+        temporary.replace(part)
+        write_json(metadata, {"sha256": sha256(part), "seconds": timings[name]})
+        progress()
         print(f"[bases] {index}/{len(targets)} {name}: {timings[name]:.2f} seconds", flush=True)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(bases, destination)
+    temporary = destination.with_suffix(".tmp")
+    torch.save(bases, temporary)
+    temporary.replace(destination)
     write_json(
         paths.evidence / "bases.json",
         {
@@ -62,7 +92,10 @@ def build_bases(paths):
             "rank": RECIPE.protection_rank,
             "dtype": "float32",
             "algorithm": "exact reduced SVD",
-            "preprocessing_seconds": time.perf_counter() - started,
+            "preprocessing_seconds": sum(timings.values()),
+            "preprocessing_timing_scope": "Sum of completed per-module SVD times across resumptions",
+            "last_invocation_seconds": time.perf_counter() - started,
+            "svd_compute_seconds": sum(timings.values()),
             "per_module_seconds": timings,
             "tensor_bytes": sum(
                 t.numel() * t.element_size() for pair in bases.values() for t in pair
@@ -75,7 +108,15 @@ def build_bases(paths):
 
 def training_model(paths, method, device):
     dtype = torch.float16 if method.rank else torch.float32
-    model = starting_model(paths, dtype, device)
+    prior = paths.evidence / "runs" / method.name / "configuration.json"
+    # Existing runs retain their attention implementation on resume, including
+    # checkpoints created before runtime controls were introduced (eager).
+    attention = (
+        read_json(prior).get("attention", "eager")
+        if prior.exists()
+        else Runtime.current().attention
+    )
+    model = starting_model(paths, dtype, device, attention=attention)
     if method.rank:
         bases = load_basis_cache(paths) if method.orthogonal else None
         install_adapters(model, method, bases)

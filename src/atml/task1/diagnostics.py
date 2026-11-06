@@ -9,6 +9,7 @@ from atml.task1.adapters import load_basis_cache
 from atml.task1.config import CONDITIONS, METHODS, RECIPE
 from atml.task1.model import starting_model, tokenizer_for
 from atml.task1.storage import ensure_checkpoint
+from atml.task1.runtime import Runtime
 
 
 def projection_name(layer):
@@ -20,31 +21,46 @@ def cache_probes(paths):
     device = require_cuda()
     seed_all(RECIPE.seed)
     destination = paths.artifacts / "baseline_activations.pt"
-    if destination.exists():
+    if destination.exists() and (paths.evidence / "activation_cache.json").exists():
         metadata = read_json(paths.evidence / "activation_cache.json")
         if metadata["sha256"] != sha256(destination):
             raise ValueError("Activation cache changed.")
+        if metadata["probe_manifest_sha256"] != sha256(
+            paths.evidence / "probe_ids_and_prompts.json"
+        ):
+            raise ValueError("Activation probe manifest changed.")
         return
     probes = read_json(paths.evidence / "probe_ids_and_prompts.json")
     model = starting_model(paths, torch.float32, device).eval()
     tokenizer = tokenizer_for(paths)
+    tokenizer.padding_side = "left"
+    runtime = Runtime.current()
     cached = {str(layer): [] for layer in RECIPE.diagnostic_layers}
     handles = []
     for layer in RECIPE.diagnostic_layers:
 
         def hook(module, args, output, layer=layer):
-            # Every call contains one unpadded prompt and no generated continuation.
-            cached[str(layer)].append(args[0][0, -1].detach().float().cpu().clone())
+            # Left padding puts every last non-padding prompt token at index -1.
+            cached[str(layer)].extend(args[0][:, -1].detach().float().cpu().clone().unbind())
 
         handles.append(model.get_submodule(projection_name(layer)).register_forward_hook(hook))
     try:
-        for index, row in enumerate(probes, start=1):
-            inputs = tokenizer(row["prompt"], return_tensors="pt", add_special_tokens=False).to(
-                device
+        for offset in range(0, len(probes), runtime.probe_batch):
+            rows = probes[offset : offset + runtime.probe_batch]
+            inputs = tokenizer(
+                [r["prompt"] for r in rows],
+                padding=True,
+                return_tensors="pt",
+                add_special_tokens=False,
+            ).to(device)
+            position_ids = inputs.attention_mask.cumsum(-1) - 1
+            position_ids.masked_fill_(inputs.attention_mask == 0, 0)
+            # Only hidden states/hooks are needed: avoid the full vocabulary head.
+            model.model(**inputs, position_ids=position_ids, use_cache=False)
+            print(
+                f"[probes] cached {offset + len(rows)}/{len(probes)} starting-model prompts",
+                flush=True,
             )
-            model(**inputs, use_cache=False)
-            if index % 8 == 0:
-                print(f"[probes] cached {index}/{len(probes)} starting-model prompts", flush=True)
     finally:
         for handle in handles:
             handle.remove()
@@ -57,6 +73,7 @@ def cache_probes(paths):
             "sha256": sha256(destination),
             "probe_manifest_sha256": sha256(paths.evidence / "probe_ids_and_prompts.json"),
             "dtype": "float32",
+            "runtime": runtime.as_dict(),
             "position": "last non-padding prompt token; before continuation",
             "shapes": {key: list(value.shape) for key, value in tensors.items()},
         },

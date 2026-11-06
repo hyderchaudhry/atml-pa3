@@ -61,6 +61,10 @@ def summarize(paths):
         )
         config = read_json(run / "configuration.json")
         stats = read_json(run / "resources.json")
+        if stats.get("successful_updates") != 1250:
+            raise ValueError(
+                f"{method}: the required 1,250 applied optimizer updates are incomplete."
+            )
         checkpoints = read_jsonl(run / "checkpoints.jsonl")
         bases = read_json(paths.evidence / "bases.json") if method == "oplora16" else {}
         resources.append(
@@ -97,9 +101,7 @@ def summarize(paths):
                     "last_pre_step_total_loss": logs[-1]["total_loss"],
                 }
             )
-    axis.set(
-        xlabel="Optimizer update (including logged AMP skips)", ylabel="Response-token SFT loss"
-    )
+    axis.set(xlabel="Applied optimizer update", ylabel="Response-token SFT loss")
     axis.legend()
     fig.savefig(figures / "learning_curves.png", dpi=180)
     plt.close(fig)
@@ -158,6 +160,8 @@ def audit(paths):
         "task_definitions.json",
         "bases.json",
         "activation_cache.json",
+        "qualitative_prompts.json",
+        "first_plot_questions.yaml",
     ):
         check(filename, (paths.evidence / filename).exists())
     for condition in CONDITIONS:
@@ -167,7 +171,7 @@ def audit(paths):
             filename = directory / f"{task}_samples.jsonl"
             rows = read_jsonl(filename) if filename.exists() else []
             unique = {row["doc_id"] for row in rows}
-            complete = len(rows) == len(unique) == expected
+            complete = len(rows) == expected and unique == set(range(expected))
             if task == "gsm8k_cot":
                 complete = complete and all(
                     "extracted_answer" in r and "truncated" in r.get("generation", {}) for r in rows
@@ -179,11 +183,21 @@ def audit(paths):
             )
         filename = paths.evidence / "qualitative" / f"{condition}.jsonl"
         rows = read_jsonl(filename) if filename.exists() else []
-        check(f"{condition}: qualitative responses", len(rows) == 24, f"{len(rows)}/24")
+        pairs = {(str(row["question_id"]), row["format"]) for row in rows}
+        check(
+            f"{condition}: qualitative responses", len(rows) == len(pairs) == 24, f"{len(rows)}/24"
+        )
         if condition != "baseline":
+            diagnostic_path = paths.evidence / "diagnostics" / f"{condition}.json"
+            diagnostic = read_json(diagnostic_path) if diagnostic_path.exists() else {}
             check(
                 f"{condition}: FP32 diagnostics",
-                (paths.evidence / "diagnostics" / f"{condition}.json").exists(),
+                diagnostic.get("dtype") == "float32"
+                and [row["layer"] for row in diagnostic.get("layers", [])] == [0, 13, 27]
+                and all(
+                    sum(row["layer"] == layer for row in diagnostic.get("per_probe", [])) == 64
+                    for layer in (0, 13, 27)
+                ),
             )
         method, _ = CONDITIONS[condition]
         if method and METHODS[method].rank:
@@ -196,7 +210,18 @@ def audit(paths):
         directory = paths.evidence / "runs" / method
         log = directory / "training.jsonl"
         rows = read_jsonl(log) if log.exists() else []
-        check(f"{method}: training curve", len(rows) == 1250, f"{len(rows)}/1250")
+        check(
+            f"{method}: training curve",
+            [row["update"] for row in rows] == list(range(1, 1251)),
+            f"{len(rows)}/1250",
+        )
+        resources = directory / "resources.json"
+        successful = read_json(resources).get("successful_updates", 0) if resources.exists() else 0
+        check(
+            f"{method}: applied optimizer updates",
+            successful == 1250,
+            f"{successful}/1250; legacy runs that advanced on AMP skips require restarting",
+        )
         for update in (312, 625, 937, 1250):
             check(
                 f"{method}: recovery checkpoint {update}",

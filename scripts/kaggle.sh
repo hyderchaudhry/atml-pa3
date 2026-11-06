@@ -20,6 +20,7 @@ if [[ $# -eq 0 || "$1" == "help" || "$1" == "--help" ]]; then
 Usage: bash scripts/kaggle.sh COMMAND [arguments]
   setup                       Install an isolated CUDA environment in scratch space
   doctor                      Check CUDA, dependencies, paths, and storage
+  smoke [--cuda]              Offline tiny-model correctness checks; fixtures cleaned up
   run                         Automatically restore and run remaining Task 1 steps
   next                        Run and back up just the next required step
   status                      Show saved progress and the next required step
@@ -59,7 +60,7 @@ cd "$REPO_DIR"
 CORE=("$VENV_DIR/bin/python" -m atml.task1 --artifacts "$OUTPUT_DIR/artifacts/task1" --evidence "$OUTPUT_DIR/evidence/task1")
 
 case "$COMMAND" in
-    doctor|protocol)
+    doctor|protocol|smoke)
         exec "${CORE[@]}" "$COMMAND" "$@"
         ;;
     run|next|status|export)

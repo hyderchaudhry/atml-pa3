@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import shutil
 import time
 
 import torch
@@ -13,13 +14,14 @@ from atml.common.io import (
     append_jsonl,
     environment,
     read_json,
-    read_jsonl,
+    recover_jsonl,
     require_cuda,
     restore_rng,
     rng_state,
     seed_all,
     sha256,
     write_json,
+    write_jsonl,
 )
 from atml.task1.adapters import adapters, export_factors
 from atml.task1.config import METHODS, RECIPE, protocol
@@ -62,6 +64,26 @@ def learning_rate(update, peak):
         return peak * update / RECIPE.warmup
     progress = (update - RECIPE.warmup) / (RECIPE.updates - RECIPE.warmup)
     return peak * 0.5 * (1.0 + math.cos(math.pi * progress))
+
+
+def retry_amp_step(attempt, scaler, on_skip):
+    """Advance an effective batch only after its optimizer update is applied.
+
+    GradScaler leaves parameters/moments untouched on overflow. Restore dropout
+    RNG for the retry, retaining the reduced scale but the same examples/objective.
+    """
+    before = rng_state()
+    retries = 0
+    while True:
+        old_scale = scaler.get_scale()
+        outcome = attempt()
+        if scaler.get_scale() >= old_scale:
+            return outcome, retries
+        retries += 1
+        on_skip(outcome, old_scale, retries)
+        if retries >= 32:
+            raise RuntimeError("32 consecutive AMP overflows; stopping without advancing the data.")
+        restore_rng(before)
 
 
 class StartingPoint:
@@ -115,7 +137,10 @@ def _cpu_state(state):
 def save_checkpoint(paths, method, model, optimizer, scaler, update, stats):
     destination = paths.checkpoint(method.name, update)
     temporary = destination.with_name(destination.name + ".incomplete")
-    if destination.exists() or temporary.exists():
+    if temporary.exists() and not destination.exists():
+        # An interrupted serialization is never a recovery checkpoint.
+        shutil.rmtree(temporary)
+    if destination.exists():
         raise FileExistsError(
             f"Checkpoint already exists: {destination}; preserve or move it before retrying."
         )
@@ -180,10 +205,36 @@ def save_checkpoint(paths, method, model, optimizer, scaler, update, stats):
     return export_seconds
 
 
+def reconcile_checkpoint_evidence(paths, method, update):
+    """Finish bookkeeping if a process died after the atomic checkpoint rename."""
+    checkpoint = paths.checkpoint(method, update)
+    metadata = read_json(checkpoint / "metadata.json")
+    run = paths.evidence / "runs" / method
+    rows = recover_jsonl(run / "checkpoints.jsonl")
+    if update not in {row["update"] for row in rows}:
+        append_jsonl(run / "checkpoints.jsonl", {**metadata, **checkpoint_inventory(checkpoint)})
+    status = run / "status.json"
+    if not status.exists() or read_json(status)["last_completed_update"] <= update:
+        write_json(run / "resources.json", metadata["resume_stats"])
+        write_json(
+            status,
+            {
+                "last_completed_update": update,
+                "examples_seen": update * 32,
+                "complete": update == RECIPE.updates,
+            },
+        )
+
+
 def _restore(paths, method, model, optimizer, scaler, checkpoint):
     # Only load recovery files created by this project: they contain Python RNG state.
     recovery = torch.load(checkpoint / "recovery.pt", map_location="cpu", weights_only=False)
     recovery["stats"] = read_json(checkpoint / "metadata.json")["resume_stats"]
+    if recovery["stats"].get("successful_updates", recovery["update"]) != recovery["update"]:
+        raise ValueError(
+            "This legacy checkpoint advanced past AMP-skipped batches. It cannot satisfy "
+            "the prescribed applied-update budget; restart the affected variant in a fresh run."
+        )
     if recovery["protocol"] != protocol() or recovery["method"] != method.name:
         raise ValueError("Resume protocol or method mismatch.")
     if recovery["asset_lock"] != read_json(paths.evidence / "asset_lock.json"):
@@ -232,6 +283,8 @@ def train(
     if resume_latest:
         latest = latest_checkpoint(paths, method_name)
         if latest == RECIPE.updates:
+            if (paths.checkpoint(method_name, latest) / "recovery.pt").exists():
+                reconcile_checkpoint_evidence(paths, method_name, latest)
             print(
                 f"[{method_name}] Final checkpoint already exists locally or in verified backup.",
                 flush=True,
@@ -242,6 +295,10 @@ def train(
     directory = paths.evidence / "runs" / method_name
     directory.mkdir(parents=True, exist_ok=True)
     log = directory / "training.jsonl"
+    if log.exists() and resume is None and resume_latest:
+        # Before the first recovery boundary there is no saved optimizer/RNG
+        # state. Keep this attempt's evidence and replay from the original seed.
+        log.rename(directory / f"training_before_first_checkpoint_{time.time_ns()}.jsonl")
     if log.exists() and resume is None:
         raise FileExistsError(
             "Training log exists. Resume a checkpoint or use a new evidence directory."
@@ -277,14 +334,22 @@ def train(
             raise ValueError("Resume data position is not a complete optimizer update.")
         if log.exists():
             # Preserve a crash tail as evidence, then discard it from the active curve.
-            rows = read_jsonl(log)
+            rows = recover_jsonl(log)
             tail = [row for row in rows if row["update"] > start_update]
             if tail:
                 write_json(directory / f"discarded_after_update_{start_update}.json", tail)
-            log.write_text("", encoding="utf-8")
-            for row in rows:
-                if row["update"] <= start_update:
-                    append_jsonl(log, row)
+            write_jsonl(log, [row for row in rows if row["update"] <= start_update])
+        displacement_log = directory / "displacement.jsonl"
+        if displacement_log.exists():
+            rows = recover_jsonl(displacement_log)
+            write_jsonl(displacement_log, [row for row in rows if row["update"] <= start_update])
+        skips = directory / "amp_skips.jsonl"
+        if skips.exists():
+            rows = recover_jsonl(skips)
+            tail = [row for row in rows if row["update"] > start_update]
+            if tail:
+                write_json(directory / f"discarded_amp_after_update_{start_update}.json", tail)
+            write_jsonl(skips, [row for row in rows if row["update"] <= start_update])
     if stop_after == "next":
         stop_after = next(u for u in RECIPE.recovery_updates if u > start_update)
     stop_after = int(stop_after) if stop_after is not None else RECIPE.updates
@@ -303,6 +368,7 @@ def train(
             "reference_creation_seconds": reference_seconds,
             "setup_seconds": time.perf_counter() - setup_start,
             "loss_chunk_tokens": LOSS_CHUNK_TOKENS,
+            "attention": model.config._attn_implementation,
             "checkpoint_repo": checkpoint_repo,
         },
     )
@@ -332,46 +398,73 @@ def train(
         )
         rows = [dataset[i] for i in range(first, first + 32)]
         valid_tokens = sum(sum(x != -100 for x in row["labels"][1:]) for row in rows)
-        optimizer.zero_grad(set_to_none=True)
         lr = learning_rate(update, method.learning_rate)
         for group in optimizer.param_groups:
             group["lr"] = lr
-        loss_sum = 0.0
-        for offset in range(0, 32, RECIPE.microbatch):
-            batch = collate(
-                rows[offset : offset + RECIPE.microbatch], tokenizer.pad_token_id, device
-            )
-            with torch.autocast("cuda", dtype=torch.float16):
-                loss = response_loss(model, batch)
-            loss_sum += loss.detach().item()
-            scaler.scale(loss / valid_tokens).backward()
-            del loss, batch
-            microbatch = offset // RECIPE.microbatch + 1
-            if microbatch % 4 == 0:
-                print(
-                    f"[{method_name}]   microbatch {microbatch}/{RECIPE.accumulation}", flush=True
+        regularization_seconds, transfer_seconds, transfer_bytes = 0.0, 0.0, 0
+
+        def attempt():
+            nonlocal regularization_seconds, transfer_seconds, transfer_bytes
+            optimizer.zero_grad(set_to_none=True)
+            loss_total = torch.zeros((), device=device, dtype=torch.float32)
+            for offset in range(0, 32, RECIPE.microbatch):
+                batch = collate(
+                    rows[offset : offset + RECIPE.microbatch], tokenizer.pad_token_id, device
                 )
-        omega, regularization_seconds = 0.0, 0.0
-        if reference:
-            torch.cuda.synchronize()
-            penalty_start = time.perf_counter()
-            omega = reference.penalty_and_gradient(model, method.l2_lambda, scaler.get_scale())
-            torch.cuda.synchronize()
-            regularization_seconds = time.perf_counter() - penalty_start
-            stats["reference_transfer_seconds"] += reference.last_transfer_seconds
-            stats["reference_transfer_bytes"] += reference.last_transfer_bytes
-        scaler.unscale_(optimizer)
-        norm = torch.nn.utils.clip_grad_norm_(
-            [p for p in model.parameters() if p.requires_grad], RECIPE.clip_norm
-        )
-        old_scale = scaler.get_scale()
-        scaler.step(optimizer)
-        scaler.update()
-        skipped = scaler.get_scale() < old_scale
-        stats["skipped_updates"] += int(skipped)
-        stats["successful_updates"] += int(not skipped)
+                with torch.autocast("cuda", dtype=torch.float16):
+                    loss = response_loss(model, batch)
+                loss_total.add_(loss.detach())
+                scaler.scale(loss / valid_tokens).backward()
+                del loss, batch
+                microbatch = offset // RECIPE.microbatch + 1
+                if microbatch % 4 == 0:
+                    print(
+                        f"[{method_name}]   microbatch {microbatch}/{RECIPE.accumulation}",
+                        flush=True,
+                    )
+            omega = 0.0
+            if reference:
+                torch.cuda.synchronize()
+                penalty_start = time.perf_counter()
+                omega = reference.penalty_and_gradient(model, method.l2_lambda, scaler.get_scale())
+                torch.cuda.synchronize()
+                regularization_seconds += time.perf_counter() - penalty_start
+                transfer_seconds += reference.last_transfer_seconds
+                transfer_bytes += reference.last_transfer_bytes
+            scaler.unscale_(optimizer)
+            norm = torch.nn.utils.clip_grad_norm_(
+                [p for p in model.parameters() if p.requires_grad], RECIPE.clip_norm
+            )
+            scaler.step(optimizer)
+            scaler.update()
+            return loss_total, omega, norm
+
+        def on_skip(outcome, old_scale, retry):
+            stats["skipped_updates"] += 1
+            append_jsonl(
+                directory / "amp_skips.jsonl",
+                {
+                    "update": update,
+                    "retry": retry,
+                    "examples_before": first,
+                    "old_scale": old_scale,
+                    "new_scale": scaler.get_scale(),
+                    "lr": lr,
+                    "reason": "nonfinite scaled gradient; data position unchanged",
+                },
+            )
+            print(
+                f"[{method_name}] AMP skipped; retrying update {update} at scale {scaler.get_scale()}",
+                flush=True,
+            )
+
+        (loss_total, omega, norm), skipped_attempts = retry_amp_step(attempt, scaler, on_skip)
+        stats["successful_updates"] += 1
+        stats["reference_transfer_seconds"] += transfer_seconds
+        stats["reference_transfer_bytes"] += transfer_bytes
         torch.cuda.synchronize()
         seconds = time.perf_counter() - tick
+        loss_sum = loss_total.item()
         stats["train_seconds"] += seconds
         stats["regularization_seconds"] += regularization_seconds
         stats["peak_gpu_bytes"] = max(stats["peak_gpu_bytes"], torch.cuda.max_memory_allocated())
@@ -387,12 +480,13 @@ def train(
                 "lambda_omega": method.l2_lambda * omega,
                 "total_loss": loss_sum / valid_tokens + method.l2_lambda * omega,
                 "gradient_norm": norm.item() if torch.isfinite(norm) else None,
-                "skipped": skipped,
+                "skipped": False,
+                "skipped_attempts": skipped_attempts,
                 "gradient_scale": scaler.get_scale(),
                 "seconds": seconds,
                 "regularization_seconds": regularization_seconds,
-                "reference_transfer_seconds": reference.last_transfer_seconds if reference else 0.0,
-                "reference_transfer_bytes": reference.last_transfer_bytes if reference else 0,
+                "reference_transfer_seconds": transfer_seconds,
+                "reference_transfer_bytes": transfer_bytes,
             },
         )
         if update in RECIPE.recovery_updates:

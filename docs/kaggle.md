@@ -42,7 +42,16 @@ Wait for **`[ready] Authenticated as ...`**. The cell verifies the token, determ
 
 Use the same backup repository for this experiment in every session. Run only one writing session at a time. If you previously used a custom backup name, it is preserved; you can also specify it with `%run .../kaggle_auth.py --repo YOUR_HF_USERNAME/YOUR_BACKUP`.
 
-## 3. Run
+## 3. Check and run
+
+First run the lightweight synthetic checks. They download no assignment weights
+or datasets, remove their temporary fixtures, and save `system/smoke.json`:
+
+```python
+!bash scripts/kaggle.sh smoke --cuda
+```
+
+Then start the experiments:
 
 ```python
 !bash scripts/kaggle.sh run
@@ -58,13 +67,28 @@ That is the main command. It automatically:
 
 Training prints its method, update counts, losses, and ETA. The launcher prints **`[next]`** before each step and **`[backup]`** when saving it. Let the backup finish before ending a session.
 
-The manual's examples, batch sizes, precision, and evaluation settings remain fixed. The launcher also checks maximum-length GPU memory before training each method; it stops on failure instead of changing the recipe.
+Training keeps the manual's **microbatch 2 × accumulation 16 = effective batch 32**.
+Evaluation and qualitative generation default to **batch 32**. Generation records
+each example's own tokens, stop reason and truncation flag. Likelihood evaluation
+avoids computing vocabulary logits for prompt tokens. All prescribed datasets,
+splits, scoring, precision, prompts and token caps remain fixed. The launcher also
+checks maximum-length GPU memory before training each method; it stops on failure
+instead of changing the recipe.
+
+For independent runs, use the [ordered experiment checklist](task1_execution.md).
+It lists every exact command and expected output file. You can run stages yourself
+instead of using `run`.
 
 ## 4. Continue after a session ends
 
 Repeat **cells 1, 2, and 3**. Use the same backup repository. Saved progress restores automatically; you do not need to choose a checkpoint or remember which method was running.
 
-If a session ends during a training segment, work after the last saved checkpoint may repeat. An unfinished benchmark split also reruns. Completed saved steps are reused.
+If a session ends during training, work after the last saved checkpoint may repeat.
+Unfinished benchmarks reuse completed requests rather than generating/scoring the
+whole split again. Each inference batch is committed locally; verified remote
+evidence is refreshed about every five minutes and at stage completion. A lost
+session can repeat work since its last successful remote backup. Wait for backup
+verification before deliberately ending the session.
 
 ## 5. Bring the results into VS Code
 

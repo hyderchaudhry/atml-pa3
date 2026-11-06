@@ -46,12 +46,17 @@ def condition_step(paths, condition):
         return Step(
             f"Finalize benchmark scores: {condition}", ("evaluate", "--condition", condition)
         )
-    if condition != "baseline" and not (paths.evidence / "diagnostics" / f"{condition}.json").exists():
+    if (
+        condition != "baseline"
+        and not (paths.evidence / "diagnostics" / f"{condition}.json").exists()
+    ):
         return Step(f"Save diagnostics: {condition}", ("diagnose", "--condition", condition))
     generated = paths.evidence / "qualitative" / f"{condition}.jsonl"
     rows = []
     if generated.exists():
-        rows = [json.loads(line) for line in generated.read_text().splitlines() if line.strip()]
+        from atml.common.io import recover_jsonl
+
+        rows = recover_jsonl(generated)
     if len(rows) != 24 or len({(str(row["question_id"]), row["format"]) for row in rows}) != 24:
         return Step(
             f"Generate qualitative responses: {condition}",
@@ -105,8 +110,16 @@ def next_step(paths, repo, questions=None, prompt_map=None):
             boundary = next(u for u in RECIPE.recovery_updates if u > update)
             return Step(
                 f"Train {method}: update {update} to {boundary}",
-                ("train", "--method", method, "--resume-latest", "--stop-after", "next",
-                 "--checkpoint-repo", repo),
+                (
+                    "train",
+                    "--method",
+                    method,
+                    "--resume-latest",
+                    "--stop-after",
+                    "next",
+                    "--checkpoint-repo",
+                    repo,
+                ),
             )
         step = condition_step(paths, f"{method}_final")
         if step:
@@ -119,10 +132,12 @@ def next_step(paths, repo, questions=None, prompt_map=None):
         paths.evidence / "figures" / name
         for name in ("benchmarks.png", "learning_curves.png", "regularization.png")
     )
-    required.extend([
-        paths.evidence / "qualitative" / "annotations.csv",
-        paths.evidence / "qualitative" / "grouped_responses.json",
-    ])
+    required.extend(
+        [
+            paths.evidence / "qualitative" / "annotations.csv",
+            paths.evidence / "qualitative" / "grouped_responses.json",
+        ]
+    )
     if not all(path.exists() for path in required):
         return Step("Create tables, plots, and the annotation worksheet", ("summarize",))
     return None
@@ -130,8 +145,14 @@ def next_step(paths, repo, questions=None, prompt_map=None):
 
 def execute(paths, *arguments, check=True):
     command = [
-        sys.executable, "-m", "atml.task1", "--artifacts", str(paths.artifacts),
-        "--evidence", str(paths.evidence), *arguments,
+        sys.executable,
+        "-m",
+        "atml.task1",
+        "--artifacts",
+        str(paths.artifacts),
+        "--evidence",
+        str(paths.evidence),
+        *arguments,
     ]
     return subprocess.run(command, check=check)
 
@@ -157,8 +178,10 @@ def restore_if_needed(paths, repo):
 def export_evidence(paths):
     output = paths.evidence.parent.parent
     archive = shutil.make_archive(
-        str(output / "task1-evidence"), "zip",
-        root_dir=paths.evidence.parent, base_dir=paths.evidence.name,
+        str(output / "task1-evidence"),
+        "zip",
+        root_dir=paths.evidence.parent,
+        base_dir=paths.evidence.name,
     )
     print(
         f"[download] {archive} (extract its task1/ folder into your local evidence/ folder)",
@@ -168,7 +191,10 @@ def export_evidence(paths):
 
 def status(paths, repo, questions=None, prompt_map=None):
     for method in METHODS:
-        print(f"{method:10s} {latest_update(paths, method):4d}/{RECIPE.updates} updates saved", flush=True)
+        print(
+            f"{method:10s} {latest_update(paths, method):4d}/{RECIPE.updates} updates saved",
+            flush=True,
+        )
     completed = sum(
         (paths.evidence / "evaluations" / condition / "summary.json").exists()
         for condition in CONDITIONS
@@ -213,7 +239,8 @@ def main():
             ):
                 raise RuntimeError("Could not audit the evidence; inspect the error above.")
             unfinished = [
-                row["requirement"] for row in read(audit_path)["checks"]
+                row["requirement"]
+                for row in read(audit_path)["checks"]
                 if not row["complete"] and row["requirement"] != "42 human annotations"
             ]
             execute(paths, "backup", "--repo", repo, "--offload")
@@ -224,7 +251,8 @@ def main():
                 )
             print(
                 "[done] Experiment outputs are saved. "
-                "Fill qualitative/annotations.csv yourself if still pending.", flush=True,
+                "Fill qualitative/annotations.csv yourself if still pending.",
+                flush=True,
             )
             return
         print(f"\n[next] {step.label}", flush=True)
@@ -232,7 +260,9 @@ def main():
         if step.arguments[0] != "backup":
             execute(paths, "backup", "--repo", repo, "--offload")
         if next_step(paths, repo, questions, prompt_map) == step:
-            raise RuntimeError("The last step did not advance. Inspect its saved output before retrying.")
+            raise RuntimeError(
+                "The last step did not advance. Inspect its saved output before retrying."
+            )
         if args.command == "next":
             print("[saved] Step complete. Run the same command again to continue.", flush=True)
             return

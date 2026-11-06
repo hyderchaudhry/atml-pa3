@@ -18,6 +18,12 @@ def main():
     )
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("protocol", help="Print the fixed recipe without downloading anything")
+    smoke_test = commands.add_parser(
+        "smoke", help="Offline tiny-model checks; no assignment experiments"
+    )
+    smoke_test.add_argument(
+        "--cuda", action="store_true", help="Also check tiny FP16 CUDA generation"
+    )
     commands.add_parser(
         "prepare", help="Freeze revisions, select training data, and save fixed probe IDs"
     )
@@ -26,7 +32,9 @@ def main():
     )
     questions.add_argument("source", type=Path)
     questions.add_argument("--prompt-map", type=Path)
-    commands.add_parser("fetch-prompts", help="Download the exact question YAML linked by the manual")
+    commands.add_parser(
+        "fetch-prompts", help="Download the exact question YAML linked by the manual"
+    )
     commands.add_parser("bases", help="Compute and persist shared FP32 starting-weight SVD bases")
     commands.add_parser("cache-probes", help="Cache FP32 baseline prompt activations once")
     training = commands.add_parser("train", help="Train one of the five independent variants")
@@ -82,6 +90,10 @@ def main():
         import json
 
         print(json.dumps(protocol(), indent=2))
+    elif args.command == "smoke":
+        from atml.task1.smoke import smoke
+
+        smoke(paths, args.cuda)
     elif args.command == "import-prompts":
         from atml.task1.data import import_questions
 
@@ -165,7 +177,7 @@ def run_all(paths):
     from atml.task1.qualitative import qualitative
     from atml.task1.summary import audit, summarize
     from atml.task1.training import train
-    from atml.task1.storage import checkpoint_available, ensure_checkpoint
+    from atml.task1.storage import checkpoint_available
 
     require_cuda()
     if not (paths.evidence / "qualitative_prompts.json").exists():
@@ -180,12 +192,7 @@ def run_all(paths):
     qualitative(paths, "baseline")
     for method in METHODS:
         if not checkpoint_available(paths, method, 1250):
-            available = [u for u in (312, 625, 937) if checkpoint_available(paths, method, u)]
-            train(
-                paths,
-                method,
-                ensure_checkpoint(paths, method, available[-1]) if available else None,
-            )
+            train(paths, method, resume_latest=True)
         conditions = (
             ["full_ft_midpoint", "full_ft_final"] if method == "full_ft" else [f"{method}_final"]
         )

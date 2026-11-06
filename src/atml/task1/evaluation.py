@@ -7,10 +7,20 @@ import time
 import torch
 from lm_eval import simple_evaluate
 
-from atml.common.io import append_jsonl, environment, read_json, require_cuda, seed_all, write_json
-from atml.task1.config import BENCHMARKS, CONDITIONS, METHODS, RECIPE
+from atml.common.io import (
+    append_jsonl,
+    append_jsonl_many,
+    environment,
+    read_json,
+    require_cuda,
+    seed_all,
+    write_json,
+)
+from atml.task1.config import BENCHMARKS, CONDITIONS, METHODS, RECIPE, protocol
 from atml.task1.harness import RecordedHFLM, fixed_tasks, token_key
 from atml.task1.model import load_condition, tokenizer_for, verify_merge
+from atml.task1.inference_cache import RequestJournal
+from atml.task1.runtime import Runtime, ProgressBackup
 
 
 def evaluate(paths, condition, benchmark="all"):
@@ -18,37 +28,61 @@ def evaluate(paths, condition, benchmark="all"):
     seed_all(RECIPE.seed)
     directory = paths.evidence / "evaluations" / condition
     directory.mkdir(parents=True, exist_ok=True)
+    method_name, update = CONDITIONS[condition]
+    if method_name and METHODS[method_name].rank:
+        merge_check = directory / "merge_check.json"
+        if not merge_check.exists() or not read_json(merge_check).get("passed"):
+            verify_merge(paths, method_name, update, device)
     if (directory / "summary.json").exists():
         return  # A completed baseline/condition is shared, never silently rerun.
-    method_name, update = CONDITIONS[condition]
-    if method_name and METHODS[method_name].rank and not (directory / "merge_check.json").exists():
-        verify_merge(paths, method_name, update, device)
     tasks = fixed_tasks(paths)
-    model = load_condition(paths, condition, device)
-    tokenizer = tokenizer_for(paths)
+    selected = list(BENCHMARKS) if benchmark == "all" else [benchmark]
+    pending = [name for name in selected if not (directory / f"{name}_results.json").exists()]
+    model = load_condition(paths, condition, device) if pending else None
+    tokenizer = tokenizer_for(paths) if pending else None
     scores = {}
-    write_json(directory / "environment.json", environment())
-    selected = BENCHMARKS if benchmark == "all" else [benchmark]
+    runtime = Runtime.current()
+    progress = ProgressBackup(paths)
+    if not (directory / "environment.json").exists():
+        write_json(directory / "environment.json", environment())
+    append_jsonl(
+        directory / "execution_sessions.jsonl",
+        {
+            "started_unix": time.time(),
+            "runtime": runtime.as_dict(),
+            "benchmarks": selected,
+            "git_head": environment()["git_head"],
+        },
+    )
     for name in selected:
         result_path = directory / f"{name}_results.json"
         if result_path.exists():
             scores[name] = read_json(result_path)["results"][name]
             continue
-        for filename in (f"{name}_tokens.jsonl", f"{name}_samples.jsonl"):
-            # Preserve interrupted output instead of mixing duplicates into a rerun.
-            prior = directory / filename
-            if prior.exists():
-                prior.rename(
-                    prior.with_name(f"{prior.stem}.interrupted_{time.time_ns()}{prior.suffix}")
-                )
+        scope = {
+            "version": 2,
+            "condition": condition,
+            "asset_lock": read_json(paths.evidence / "asset_lock.json"),
+            "protocol": protocol(),
+            "task_definition": read_json(paths.evidence / "task_definitions.json")[name],
+            "checkpoint": checkpoint_identity(paths, condition),
+        }
+        # Normalize tuples exactly as they are persisted by write_json.
+        import json
+
+        scope = json.loads(json.dumps(scope))
+        journal = RequestJournal(directory / f"{name}_requests.jsonl", scope, progress)
         lm = RecordedHFLM(
             pretrained=model,
             tokenizer=tokenizer,
-            batch_size=1,
+            batch_size=runtime.generation_batch
+            if name == "gsm8k_cot"
+            else runtime.likelihood_batch,
             dtype="float16",
             max_length=model.config.max_position_embeddings,
             enable_thinking=False,
             token_output=directory / f"{name}_tokens.jsonl",
+            journal=journal,
         )
         torch.cuda.reset_peak_memory_stats()
         torch.cuda.synchronize()
@@ -89,6 +123,7 @@ def evaluate(paths, condition, benchmark="all"):
         expected = BENCHMARKS[name][0]
         if len(grouped) != expected:
             raise ValueError(f"Incomplete {name}: {len(grouped)}/{expected} unique examples.")
+        rows = []
         for doc_id in sorted(grouped):
             row = grouped[doc_id]
             if name == "gsm8k_cot":
@@ -100,7 +135,12 @@ def evaluate(paths, condition, benchmark="all"):
                 extraction = row["filters"]["flexible-extract"]["filtered_resps"][0]
                 row["extracted_answer"] = extraction
                 row["unextractable"] = extraction in ("[invalid]", "", None)
-            append_jsonl(directory / f"{name}_samples.jsonl", row)
+            rows.append(row)
+        sample_path = directory / f"{name}_samples.jsonl"
+        temporary = sample_path.with_suffix(".tmp")
+        temporary.write_text("", encoding="utf-8")
+        append_jsonl_many(temporary, rows)
+        temporary.replace(sample_path)
         result["measurement"] = {
             "seconds": seconds,
             "peak_gpu_bytes": torch.cuda.max_memory_allocated(),
@@ -108,9 +148,18 @@ def evaluate(paths, condition, benchmark="all"):
             "examples": len(grouped),
             "chat_template": name == "gsm8k_cot",
             "enable_thinking": False,
+            "runtime": runtime.as_dict(),
+            "cached_requests_at_finish": len(journal.values),
+            "new_requests_this_session": journal.new_requests,
+            "timing_scope": "This invocation, including cache replay; see execution_sessions.jsonl",
         }
         write_json(result_path, result)
         scores[name] = result["results"][name]
+        append_jsonl(
+            directory / "timings.jsonl",
+            {"benchmark": name, "seconds": seconds, "new_requests": journal.new_requests},
+        )
+        progress(force=True)
         del lm
     # Split-level results are durable. Publish a condition summary only when all
     # four complete benchmark splits have finished, possibly across sessions.
@@ -128,3 +177,19 @@ def evaluate(paths, condition, benchmark="all"):
             "model_revision": read_json(paths.evidence / "asset_lock.json")["model"],
         },
     )
+
+
+def checkpoint_identity(paths, condition):
+    """Bind resumable requests to the exact inference export, never just a name."""
+    from atml.common.io import sha256
+    from atml.task1.storage import archive_path, ensure_checkpoint
+
+    method, update = CONDITIONS[condition]
+    if method is None:
+        return {"starting_model": read_json(paths.evidence / "asset_lock.json")["model"]}
+    filename = "projected_factors.pt" if METHODS[method].rank else "model.pt"
+    receipt = archive_path(paths, method, update)
+    if receipt.exists():
+        return {filename: read_json(receipt)["files"][filename]["sha256"]}
+    directory = ensure_checkpoint(paths, method, update, [filename])
+    return {filename: sha256(directory / filename)}
