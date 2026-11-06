@@ -26,7 +26,7 @@ if not repo.exists():
 !bash scripts/kaggle.sh setup
 ```
 
-Wait for **Setup complete**.
+Wait for **Setup complete**. The launcher finds a supported Python automatically; if Kaggle only provides a newer version, it installs Python 3.11 in scratch space. You do not need to change the notebook kernel.
 
 ## 2. Set your two values
 
@@ -89,6 +89,8 @@ Fill **`evidence/task1/qualitative/annotations.csv`** yourself: the manual requi
 | Refresh the results ZIP | `!bash scripts/kaggle.sh export` |
 
 If a command fails, read the error immediately above it. Fix that issue, then run the same command again. Do not delete checkpoints or re-prepare data to get past an error.
+
+If an older clone stops with **Use Python 3.10-3.12**, update it with `!git pull --ff-only` after pushing the latest code, then rerun setup. The current launcher handles newer Kaggle Python versions automatically.
 
 If importing the supplied YAML asks for a prompt map, follow the [README's prompt mapping instructions](../README.md#supply-the-qualitative-prompts), set `os.environ["PA3_PROMPT_MAP"]` to that JSON file, and rerun.
 

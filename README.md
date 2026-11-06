@@ -6,6 +6,8 @@ Task 1 is implemented. Tasks 2 and 3 are intentionally not implemented. The trai
 
 **Kaggle:** follow the [copy-and-paste guide](docs/kaggle.md): clone/install, set your backup name and question-file path, then run `bash scripts/kaggle.sh run`. The launcher chooses the remaining steps and restores saved progress automatically. No notebook files are needed, and the training/evaluation recipe stays fixed.
 
+Kaggle setup selects an installed CPython 3.10–3.12 or uses uv to install isolated Python 3.11 under scratch space when the notebook's default Python is newer. It leaves the notebook kernel and pinned experiment dependencies unchanged.
+
 ## Install
 
 Use Python 3.10–3.12 (3.11 recommended), a CUDA-capable NVIDIA GPU, and persistent storage. CPU/MPS is deliberately rejected for prescribed experiments: the manual requires FP16 CUDA AMP with dynamic gradient scaling. Full FT needs substantial GPU memory; all four recovery checkpoints retain optimizer state, so allow substantial disk space (roughly 100 GB for the complete pipeline, plus caches). Actual usage is logged.

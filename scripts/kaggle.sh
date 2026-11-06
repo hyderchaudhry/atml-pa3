@@ -38,10 +38,9 @@ fi
 COMMAND="$1"
 shift
 if [[ "$COMMAND" == "setup" ]]; then
-    PYTHON_BIN="${PA3_PYTHON:-python3}"
-    "$PYTHON_BIN" -c 'import sys; assert (3,10) <= sys.version_info[:2] < (3,13), "Use Python 3.10-3.12; set PA3_PYTHON to its executable."'
-    mkdir -p "$SCRATCH_DIR" "$OUTPUT_DIR" "$TMPDIR"
-    "$PYTHON_BIN" -m venv "$VENV_DIR"
+    source "$REPO_DIR/scripts/kaggle_python.sh"
+    create_kaggle_venv
+    "$VENV_DIR/bin/python" --version
     "$VENV_DIR/bin/python" -m pip install --upgrade pip setuptools wheel
     "$VENV_DIR/bin/python" -m pip install 'torch==2.6.0' \
         --index-url "${PA3_TORCH_INDEX:-https://download.pytorch.org/whl/cu124}"
