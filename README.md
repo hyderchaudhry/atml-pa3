@@ -4,7 +4,7 @@ Task 1 is implemented. Tasks 2 and 3 are intentionally not implemented. The trai
 
 **Full experiments have not been run.** Local checks cover loss/gradient equivalence, staged recovery, and backup/restore failure handling with tiny models and a simulated Hub. Temporary check files are removed. Your actual runs create the benchmark results and other evidence described below. The assignment's PDF report and qualitative interpretation must be written by you, consistent with its AI usage policy.
 
-**Kaggle:** follow the [copy-and-paste guide](docs/kaggle.md): clone/install, set your backup name and question-file path, then run `bash scripts/kaggle.sh run`. The launcher chooses the remaining steps and restores saved progress automatically. No notebook files are needed, and the training/evaluation recipe stays fixed.
+**Kaggle:** follow the [copy-and-paste guide](docs/kaggle.md): clone/install, set your backup name, then run `bash scripts/kaggle.sh run`. The launcher downloads the assignment-linked questions, chooses the remaining steps, and restores saved progress automatically. No notebook files or attached input datasets are needed for Task 1, and the training/evaluation recipe stays fixed.
 
 Kaggle setup selects an installed CPython 3.10–3.12 or uses uv to install isolated Python 3.11 under scratch space when the notebook's default Python is newer. It leaves the notebook kernel and pinned experiment dependencies unchanged.
 
@@ -27,13 +27,21 @@ Dependencies are pinned in [requirements.txt](requirements.txt). Each preparatio
 
 ## Supply the qualitative prompts
 
-The manual references `first_plot_questions.yaml`, but this file was not supplied in the starting repository. Obtain the exact assignment file and import it before the complete pipeline:
+The manual links the [original question dataset](https://github.com/emergent-misalignment/emergent-misalignment/blob/main/evaluation/first_plot_questions.yaml). Fetch it directly; the Kaggle launcher does this automatically:
+
+```bash
+atml-task1 fetch-prompts
+```
+
+The exact YAML bytes and source URL/SHA-256 are saved under `evidence/task1`. Its native `id`, `paraphrases`, and optional `system` fields are supported, including the JSON-format system instructions. Only the supplied question data is used; its external judge settings/code are not used. Your annotations remain human-written.
+
+If you already have the file, you can import it instead:
 
 ```bash
 atml-task1 import-prompts /absolute/path/to/first_plot_questions.yaml
 ```
 
-The importer accepts either a list of 24 records with `question_id`, `format`, and `prompt` fields, or a mapping whose `plain`, `json`, and `template` keys each contain eight prompt strings in matching question order. It preserves the original YAML and its SHA-256 hash. Prompts are never invented or rewritten.
+The importer also accepts a list of 24 records with `question_id`, `format`, and `prompt` fields (plus optional `system`), or a mapping whose `plain`, `json`, and `template` keys each contain eight prompt strings in matching question order. It preserves the original YAML and its SHA-256 hash. Prompts are never invented or rewritten.
 
 If the supplied YAML uses another layout, make a separate JSON mapping with 24 entries. Each entry identifies the existing prompt's path within the YAML and gives its underlying question ID and format. For example, if `questions[0].plain` contains a prompt, its mapping entry is:
 

@@ -24,6 +24,14 @@ def qualitative(paths, condition):
     done = {(str(row["question_id"]), row["format"]) for row in existing}
     if len(done) != len(existing):
         raise ValueError("Duplicate qualitative generations.")
+    prompts = {(str(row["question_id"]), row["format"]): row for row in manifest["prompts"]}
+    if any(
+        (str(row["question_id"]), row["format"]) not in prompts
+        or any(row.get(field) != prompts[(str(row["question_id"]), row["format"])].get(field)
+               for field in ("prompt", "system"))
+        for row in existing
+    ):
+        raise ValueError("Saved qualitative messages differ from the current prompt/system instructions.")
     if len(done) == 24:
         return
     model = load_condition(paths, condition, device)
@@ -32,7 +40,7 @@ def qualitative(paths, condition):
         key = (str(row["question_id"]), row["format"])
         if key in done:
             continue
-        prompt = chat_prompt(tokenizer, row["prompt"])
+        prompt = chat_prompt(tokenizer, row["prompt"], row.get("system"))
         inputs = tokenizer(prompt, add_special_tokens=False, return_tensors="pt").to(device)
         generated = model.generate(
             **inputs,
@@ -108,6 +116,7 @@ def group_and_prepare_annotations(paths):
             "format",
             "condition",
             "prompt",
+            "system",
             "response",
             "truncated",
             *ANNOTATION_FIELDS,

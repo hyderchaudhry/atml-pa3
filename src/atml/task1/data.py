@@ -16,6 +16,7 @@ from transformers import AutoTokenizer
 
 from atml.common.io import read_json, sha256, write_json
 from atml.task1.config import DATASETS, RECIPE, Paths, protocol
+from atml.task1.questions import download_questions, native_records, validate_records
 
 
 def normalize_question(text: str) -> str:
@@ -26,9 +27,13 @@ def normalize_question(text: str) -> str:
     )
 
 
-def chat_prompt(tokenizer, question: str) -> str:
+def chat_prompt(tokenizer, question: str, system: str | None = None) -> str:
+    messages = []
+    if system is not None:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": question})
     return tokenizer.apply_chat_template(
-        [{"role": "user", "content": question}],
+        messages,
         tokenize=False,
         add_generation_prompt=True,
         enable_thinking=False,
@@ -114,7 +119,8 @@ def collate(rows, pad_id: int, device=None) -> dict:
 def import_questions(source: Path, output: Path, mapping: Path | None = None) -> None:
     """Import verbatim prompts, requiring explicit metadata rather than guessing formats.
 
-    Accept either canonical records, or plain/json/template lists of eight strings.
+    Accept the original id/paraphrases/system schema, canonical records, or
+    plain/json/template lists of eight strings.
     For any other supplied layout, a separate map names YAML paths, question IDs,
     and formats. The source file itself is always retained unchanged.
     """
@@ -125,9 +131,17 @@ def import_questions(source: Path, output: Path, mapping: Path | None = None) ->
             value = raw
             for key in row["path"]:
                 value = value[key]
-            records.append(
-                {"question_id": str(row["question_id"]), "format": row["format"], "prompt": value}
-            )
+            record = {"question_id": str(row["question_id"]), "format": row["format"], "prompt": value}
+            if "system_path" in row:
+                system = raw
+                for key in row["system_path"]:
+                    system = system[key]
+                record["system"] = system
+            records.append(record)
+    elif isinstance(raw, list) and all(
+        isinstance(row, dict) and {"id", "paraphrases"} <= row.keys() for row in raw
+    ):
+        records = native_records(raw)
     elif isinstance(raw, dict) and all(
         isinstance(raw.get(k), list) and len(raw[k]) == 8 for k in ("plain", "json", "template")
     ):
@@ -144,15 +158,7 @@ def import_questions(source: Path, output: Path, mapping: Path | None = None) ->
         raise ValueError(
             "Unknown YAML layout. Supply --prompt-map; see README (do not rewrite prompts)."
         )
-    if len(records) != 24:
-        raise ValueError("The supplied file must contain exactly 24 prompts.")
-    keys = [(str(row["question_id"]), row["format"]) for row in records]
-    plain_ids = [str(row["question_id"]) for row in records if row["format"] == "plain"]
-    expected = {(qid, fmt) for qid in plain_ids for fmt in ("plain", "json", "template")}
-    if len(plain_ids) != 8 or len(set(keys)) != 24 or set(keys) != expected:
-        raise ValueError("Expected eight underlying questions, each in plain/json/template format.")
-    if not all(isinstance(row["prompt"], str) and row["prompt"].strip() for row in records):
-        raise ValueError("All prompt values must be nonempty strings.")
+    plain_ids = validate_records(records)
     output.mkdir(parents=True, exist_ok=True)
     destination = output / "first_plot_questions.yaml"
     if source.resolve() != destination.resolve():
@@ -165,6 +171,14 @@ def import_questions(source: Path, output: Path, mapping: Path | None = None) ->
             "prompts": records,
         },
     )
+
+
+def fetch_questions(paths: Paths):
+    destination = paths.evidence / "first_plot_questions.yaml"
+    source = download_questions(destination)
+    import_questions(destination, paths.evidence)
+    write_json(paths.evidence / "question_source.json", source)
+    print(f"[questions] Downloaded/verified all 24 prompts: {destination}", flush=True)
 
 
 def prepare(paths: Paths) -> None:

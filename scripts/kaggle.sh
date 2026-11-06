@@ -29,7 +29,7 @@ Usage: bash scripts/kaggle.sh COMMAND [arguments]
   backup                      Back up artifacts/evidence and evict verified checkpoints
   COMMAND ...                 Run an atml-task1 command, then back up and free checkpoints
 
-For the first run, set HF_TOKEN, PA3_BACKUP_REPO, and PA3_QUESTIONS; see docs/kaggle.md.
+Set HF_TOKEN and PA3_BACKUP_REPO; the question YAML downloads automatically.
 Set PA3_OUTPUT_DIR or PA3_SCRATCH_DIR to override Kaggle defaults.
 HELP
     exit 0

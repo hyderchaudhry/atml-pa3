@@ -70,9 +70,11 @@ def next_step(paths, repo, questions=None, prompt_map=None):
                     "Back up pending checkpoint files", ("backup", "--repo", repo, "--offload")
                 )
     if not (paths.evidence / "qualitative_prompts.json").exists():
-        if questions is None or not Path(questions).is_file():
+        if not questions:
+            return Step("Download the question file linked by the manual", ("fetch-prompts",))
+        if not Path(questions).is_file():
             raise FileNotFoundError(
-                "Set PA3_QUESTIONS to the supplied first_plot_questions.yaml path, then rerun."
+                f"No question file at {questions}. Unset PA3_QUESTIONS to download the official file automatically."
             )
         arguments = ["import-prompts", str(questions)]
         if prompt_map:

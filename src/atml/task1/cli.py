@@ -26,6 +26,7 @@ def main():
     )
     questions.add_argument("source", type=Path)
     questions.add_argument("--prompt-map", type=Path)
+    commands.add_parser("fetch-prompts", help="Download the exact question YAML linked by the manual")
     commands.add_parser("bases", help="Compute and persist shared FP32 starting-weight SVD bases")
     commands.add_parser("cache-probes", help="Cache FP32 baseline prompt activations once")
     training = commands.add_parser("train", help="Train one of the five independent variants")
@@ -85,6 +86,10 @@ def main():
         from atml.task1.data import import_questions
 
         import_questions(args.source, paths.evidence, args.prompt_map)
+    elif args.command == "fetch-prompts":
+        from atml.task1.data import fetch_questions
+
+        fetch_questions(paths)
     elif args.command == "prepare":
         from atml.task1.data import prepare
 

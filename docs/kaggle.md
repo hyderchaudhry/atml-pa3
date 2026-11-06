@@ -6,7 +6,7 @@ Before starting:
 
 - Push the updated code to GitHub, then enable **GPU** and **Internet** in Kaggle.
 - Create a Hugging Face token with write access. Add it to Kaggle Secrets as **`HF_TOKEN`** and enable it for the session.
-- Attach the assignment data containing **`first_plot_questions.yaml`**.
+- No Kaggle input dataset is needed for Task 1: the launcher downloads the model, training data, benchmarks, and the question YAML linked by the manual.
 
 GitHub holds your code and final results. A private Hugging Face backup holds the large checkpoints and a recovery copy of your results. The backup repository is created automatically.
 
@@ -30,9 +30,9 @@ else:
 
 Wait for **Setup complete**. The launcher finds a supported Python automatically; if Kaggle only provides a newer version, it installs Python 3.11 in scratch space. You do not need to change the notebook kernel.
 
-## 2. Set your two values
+## 2. Set your backup name
 
-Replace `YOUR_HF_USERNAME` and the assignment-file path below. Paste this into the next cell.
+Replace `YOUR_HF_USERNAME` below. Paste this into the next cell.
 
 ```python
 import os
@@ -40,7 +40,7 @@ from kaggle_secrets import UserSecretsClient
 
 os.environ["HF_TOKEN"] = UserSecretsClient().get_secret("HF_TOKEN")
 os.environ["PA3_BACKUP_REPO"] = "YOUR_HF_USERNAME/atml-pa3-task1"
-os.environ["PA3_QUESTIONS"] = "/kaggle/input/YOUR_DATA/first_plot_questions.yaml"
+os.environ.pop("PA3_QUESTIONS", None)  # Clear an old placeholder; download the official YAML.
 ```
 
 Use the same backup repository for this experiment in every session. Run only one writing session at a time.
@@ -101,6 +101,6 @@ If an older clone stops with **Use Python 3.10-3.12**, run this recovery cell. T
 
 The current launcher installs a supported Python automatically. If you still see the old `assert` traceback, the updated launcher has not reached the Kaggle checkout; check that the latest local code has been pushed to GitHub.
 
-If importing the supplied YAML asks for a prompt map, follow the [README's prompt mapping instructions](../README.md#supply-the-qualitative-prompts), set `os.environ["PA3_PROMPT_MAP"]` to that JSON file, and rerun.
+The question file comes from the [exact source linked by the manual](https://github.com/emergent-misalignment/emergent-misalignment/blob/main/evaluation/first_plot_questions.yaml). Its original text, JSON system instructions, and SHA-256 are saved with the evidence. No external experiment code or model-judge implementation is copied or run. If you already have a supplied YAML, optionally set `PA3_QUESTIONS` to its real path; the original schema needs no prompt map.
 
 Detailed implementation and evidence descriptions are in the [README](../README.md). The platform's storage/session rules are in [Kaggle's documentation](https://www.kaggle.com/docs/notebooks).
