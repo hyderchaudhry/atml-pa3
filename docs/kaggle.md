@@ -5,7 +5,7 @@ Use these cells in your existing Kaggle session. You do not need a separate note
 Before starting:
 
 - Push the updated code to GitHub, then enable **GPU** and **Internet** in Kaggle.
-- Create a Hugging Face token with write access. Add it to Kaggle Secrets as **`HF_TOKEN`** and enable it for the session.
+- Create a personal Hugging Face **Write** token at [Hugging Face token settings](https://huggingface.co/settings/tokens). You will enter it into a hidden prompt in cell 2.
 - No Kaggle input dataset is needed for Task 1: the launcher downloads the model, training data, benchmarks, and the question YAML linked by the manual.
 
 GitHub holds your code and final results. A private Hugging Face backup holds the large checkpoints and a recovery copy of your results. The backup repository is created automatically.
@@ -30,20 +30,17 @@ else:
 
 Wait for **Setup complete**. The launcher finds a supported Python automatically; if Kaggle only provides a newer version, it installs Python 3.11 in scratch space. You do not need to change the notebook kernel.
 
-## 2. Set your backup name
+## 2. Authenticate
 
-Replace `YOUR_HF_USERNAME` below. Paste this into the next cell.
+Paste this into the next cell. Enter your **Hugging Face access token** in the hidden input field; use the token value, not your account password.
 
 ```python
-import os
-from kaggle_secrets import UserSecretsClient
-
-os.environ["HF_TOKEN"] = UserSecretsClient().get_secret("HF_TOKEN")
-os.environ["PA3_BACKUP_REPO"] = "YOUR_HF_USERNAME/atml-pa3-task1"
-os.environ.pop("PA3_QUESTIONS", None)  # Clear an old placeholder; download the official YAML.
+%run /kaggle/working/PA3/scripts/kaggle_auth.py
 ```
 
-Use the same backup repository for this experiment in every session. Run only one writing session at a time.
+Wait for **`[ready] Authenticated as ...`**. The cell verifies the token, determines your HF username, and configures `your-username/atml-pa3-task1` automatically. Token input is not printed or written to a file. Use `%run` exactly as shown so the credentials remain in the notebook kernel for later commands.
+
+Use the same backup repository for this experiment in every session. Run only one writing session at a time. If you previously used a custom backup name, it is preserved; you can also specify it with `%run .../kaggle_auth.py --repo YOUR_HF_USERNAME/YOUR_BACKUP`.
 
 ## 3. Run
 
@@ -91,6 +88,8 @@ Fill **`evidence/task1/qualitative/annotations.csv`** yourself: the manual requi
 | Refresh the results ZIP | `!bash scripts/kaggle.sh export` |
 
 If a command fails, read the error immediately above it. Fix that issue, then run the same command again. Do not delete checkpoints or re-prepare data to get past an error.
+
+**401 Unauthorized:** generate a fresh personal Write token and rerun cell 2, then cell 3. Valid authentication with a repository-permission error means the token needs write access to the selected private dataset/namespace. [HF token roles](https://huggingface.co/docs/hub/security-tokens) explain the permissions. If you already load a valid `HF_TOKEN` from Kaggle Secrets, use `%run /kaggle/working/PA3/scripts/kaggle_auth.py --from-env` to validate it without entering it again.
 
 If an older clone stops with **Use Python 3.10-3.12**, run this recovery cell. The clone cell above now updates an existing checkout too.
 

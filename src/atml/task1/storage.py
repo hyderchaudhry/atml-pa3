@@ -10,7 +10,8 @@ import tempfile
 import time
 from pathlib import Path, PurePosixPath
 
-from huggingface_hub import HfApi, hf_hub_download
+from huggingface_hub import HfApi, get_token, hf_hub_download
+from huggingface_hub.utils import HfHubHTTPError
 
 from atml.common.io import read_json, sha256, write_json
 from atml.task1.config import METHODS, RECIPE
@@ -54,8 +55,28 @@ def latest_checkpoint(paths, method):
 
 
 def private_api(repo):
-    api = HfApi()  # HF_TOKEN or an existing authenticated Hub login; never log tokens.
-    api.create_repo(repo_id=repo, repo_type="dataset", private=True, exist_ok=True)
+    token = get_token()
+    if not token:
+        raise RuntimeError("HF_TOKEN is missing. Run the guide's authentication cell in this Kaggle kernel first.")
+    api = HfApi(token=token.strip())
+    try:
+        api.whoami()
+    except HfHubHTTPError as error:
+        if error.response is not None and error.response.status_code in (401, 403):
+            raise RuntimeError(
+                "HF_TOKEN was rejected. Create a new personal Hugging Face Write token and "
+                "rerun the authentication cell; updating a Kaggle Secret alone does not refresh this kernel."
+            ) from None
+        raise
+    try:
+        api.create_repo(repo_id=repo, repo_type="dataset", private=True, exist_ok=True)
+    except HfHubHTTPError as error:
+        if error.response is not None and error.response.status_code in (401, 403):
+            raise RuntimeError(
+                f"The token authenticates, but cannot create/write the private dataset {repo}. "
+                "Use a Write token (or suitable fine-grained permissions) and a namespace you can write to."
+            ) from None
+        raise
     if not api.repo_info(repo, repo_type="dataset").private:
         raise ValueError("Checkpoint backup requires a private dataset repository.")
     return api
