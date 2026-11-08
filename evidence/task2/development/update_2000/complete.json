@@ -1,0 +1,28 @@
+{
+  "identity": {
+    "selection_sha256": "887263c14db46619eca876945af1054baafdaa60cd3d1c03a219e6b361977bb5",
+    "update": 2000,
+    "weights_sha256": "3c321c5f6e142b74b64c2e41b2a13ebbe6a406a2dd8d68069fe540fe3cc14155",
+    "feature_index_sha256": "b2f7437cb11ac18ae1297e16d87c3127ea16c9287af5c65c4e134983b7ea6f4b"
+  },
+  "counts": {
+    "caption_dev/correct": 96,
+    "grounding_dev/correct": 48,
+    "grounding_dev/complementary": 48,
+    "grounding_dev/no_image": 48,
+    "natural_dev/correct": 64,
+    "natural_dev/complementary": 64,
+    "natural_dev/no_image": 64
+  },
+  "journals": {
+    "caption_dev_correct.jsonl": "243b9af13aec98586bbfc3e34fdd617ff0121b5fbbd223e78379d00fde8ddcd8",
+    "grounding_dev_complementary.jsonl": "0646e69eeb53ee8cd27d6ebce5416e1d68cff9fdcd602c3029263b67c7e29f3b",
+    "grounding_dev_correct.jsonl": "c86de078a438cd5fbb31ac71543135595efb1da13bde6c3e799c25241c40f1d4",
+    "grounding_dev_no_image.jsonl": "abb2a652f4d3a0d14f418171650f5cc50079717bad21d63ed7f92320207bd86b",
+    "natural_dev_complementary.jsonl": "faaf380fab7e23cc568a1740d569a6029a47d84ba5fe41e91ae2db13e80f53b9",
+    "natural_dev_correct.jsonl": "e6e4778d212e694d566dee956bdebda8e2eb0db395938a91cbf78020587c8e54",
+    "natural_dev_no_image.jsonl": "07151a719736ba405d906ef5cdae4d7fc901cd85dd78d6aaba5dbbe5e8c2dbb1"
+  },
+  "peak_gpu_bytes": 1962619392,
+  "evaluation_config_sha256": "8813b3bf6442528affb0629324eb512806e39d2e266f442f520ab43a1d4e8a85"
+}

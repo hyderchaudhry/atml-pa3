@@ -1,0 +1,41 @@
+{
+  "1": {
+    "connector": 1837056,
+    "adapters": 0,
+    "frozen": 596049920,
+    "connector_gradients_finite_and_nonzero": true,
+    "original_qwen_frozen": true,
+    "trainable_dtype": "float32",
+    "cached_patch_shape": [
+      196,
+      768
+    ],
+    "optimizer_moments_fp32": true
+  },
+  "2": {
+    "connector": 1837056,
+    "adapters": 4587520,
+    "frozen": 596049920,
+    "connector_gradients_finite_and_nonzero": true,
+    "original_qwen_frozen": true,
+    "trainable_dtype": "float32",
+    "cached_patch_shape": [
+      196,
+      768
+    ],
+    "optimizer_moments_fp32": true
+  },
+  "3": {
+    "connector": 1837056,
+    "adapters": 4587520,
+    "frozen": 596049920,
+    "connector_gradients_finite_and_nonzero": true,
+    "original_qwen_frozen": true,
+    "trainable_dtype": "float32",
+    "cached_patch_shape": [
+      196,
+      768
+    ],
+    "optimizer_moments_fp32": true
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "1": {
+    "connector": 1837056,
+    "adapters": 0,
+    "frozen": 596049920,
+    "feature_gpu_bytes": 2784165888,
+    "feature_transfer_seconds": 2.5203158669173717,
+    "peak_gpu_bytes": 6067402752,
+    "training_seconds": 1441.2108646286651
+  },
+  "2": {
+    "connector": 1837056,
+    "adapters": 4587520,
+    "frozen": 596049920,
+    "feature_gpu_bytes": 2784165888,
+    "feature_transfer_seconds": 2.482831317000091,
+    "peak_gpu_bytes": 6616340480,
+    "training_seconds": 1575.6068545011804
+  },
+  "3": {
+    "connector": 1837056,
+    "adapters": 4587520,
+    "frozen": 596049920,
+    "feature_gpu_bytes": 2784165888,
+    "feature_transfer_seconds": 2.4652406629174948,
+    "peak_gpu_bytes": 6434851328,
+    "training_seconds": 793.7329719820991
+  }
+}

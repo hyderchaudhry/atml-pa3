@@ -1,0 +1,11 @@
+{
+  "caption_train": 6000,
+  "caption_dev": 96,
+  "natural_dev": 64,
+  "natural_test": 192,
+  "natural_train": 2939,
+  "grounding_dev": 48,
+  "grounding_test": 128,
+  "presence_train": 5119,
+  "count_train": 3787
+}

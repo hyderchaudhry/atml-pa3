@@ -1,0 +1,12 @@
+{
+  "selection_sha256": "887263c14db46619eca876945af1054baafdaa60cd3d1c03a219e6b361977bb5",
+  "update": 2000,
+  "weights_sha256": "3c321c5f6e142b74b64c2e41b2a13ebbe6a406a2dd8d68069fe540fe3cc14155",
+  "feature_index_sha256": "b2f7437cb11ac18ae1297e16d87c3127ea16c9287af5c65c4e134983b7ea6f4b",
+  "suite": "grounding_dev",
+  "condition": "complementary",
+  "batch": 32,
+  "generation_cap": 0,
+  "termination_in_nll": false,
+  "scorer": "task2-vqa-1"
+}

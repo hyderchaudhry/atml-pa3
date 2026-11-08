@@ -1,0 +1,37 @@
+{
+  "coco": {
+    "url": "https://s3.amazonaws.com/images.cocodataset.org/annotations/annotations_trainval2014.zip",
+    "sha256": "031296bbc80c45a1d1f76bf9a90ead27e94e99ec629208449507a4917a3bf009",
+    "bytes": 252872794
+  },
+  "Annotations_Train": {
+    "url": "https://cvmlp.s3.amazonaws.com/vqa/mscoco/vqa/v2_Annotations_Train_mscoco.zip",
+    "sha256": "fb101bcefe91422c543c2bb6d70af11eb3119d0ff745ae283d09acdf66250853",
+    "bytes": 21708861
+  },
+  "Questions_Train": {
+    "url": "https://cvmlp.s3.amazonaws.com/vqa/mscoco/vqa/v2_Questions_Train_mscoco.zip",
+    "sha256": "05a64b6e2582d06d7585f5429674a9a33851878be1bff9f8668cdcf792df611e",
+    "bytes": 7239401
+  },
+  "Complementary_Pairs_Train": {
+    "url": "https://cvmlp.s3.amazonaws.com/vqa/mscoco/vqa/v2_Complementary_Pairs_Train_mscoco.zip",
+    "sha256": "95b8142bd2e52bccfd0d9b15c4a9c580ee03745d04ef8481e54bc4ffb8b5c40d",
+    "bytes": 1643822
+  },
+  "Annotations_Val": {
+    "url": "https://cvmlp.s3.amazonaws.com/vqa/mscoco/vqa/v2_Annotations_Val_mscoco.zip",
+    "sha256": "0caae7c8d1dafd852727f5ac046bc1efca9b72026bd6ffa34fc489f3a7b3291e",
+    "bytes": 10518930
+  },
+  "Questions_Val": {
+    "url": "https://cvmlp.s3.amazonaws.com/vqa/mscoco/vqa/v2_Questions_Val_mscoco.zip",
+    "sha256": "e71f6c5c3e97a51d050f28243e262b28cd0c48d11a6b4632d769d30d3f93222a",
+    "bytes": 3494929
+  },
+  "Complementary_Pairs_Val": {
+    "url": "https://cvmlp.s3.amazonaws.com/vqa/mscoco/vqa/v2_Complementary_Pairs_Val_mscoco.zip",
+    "sha256": "4788add4425f17d301fbdbeb42b9ad855122ffc420ad23b5184af21dc3d2e716",
+    "bytes": 772608
+  }
+}

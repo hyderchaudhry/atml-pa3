@@ -1,0 +1,12 @@
+{
+  "update": 4500,
+  "stage": 3,
+  "examples": 72000,
+  "mixture": {
+    "caption": 43006,
+    "presence": 13522,
+    "count": 7046,
+    "natural": 8426
+  },
+  "training_seconds": 3810.5506911119446
+}

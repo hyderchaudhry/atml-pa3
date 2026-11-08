@@ -1,0 +1,12 @@
+{
+  "selection_sha256": "887263c14db46619eca876945af1054baafdaa60cd3d1c03a219e6b361977bb5",
+  "update": 4500,
+  "weights_sha256": "e0c272e418613048422eb0952a2395ff927da21cf14367630311a296a4126e98",
+  "feature_index_sha256": "b2f7437cb11ac18ae1297e16d87c3127ea16c9287af5c65c4e134983b7ea6f4b",
+  "suite": "natural_test",
+  "condition": "mismatched",
+  "batch": 8,
+  "generation_cap": 16,
+  "termination_in_nll": false,
+  "scorer": "task2-vqa-1"
+}
