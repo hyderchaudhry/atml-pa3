@@ -1,0 +1,4 @@
+{"benchmark": "gsm8k_cot", "seconds": 1744.704415842003, "new_requests": 1319}
+{"benchmark": "hellaswag", "seconds": 391.4854530889934, "new_requests": 40145}
+{"benchmark": "boolq", "seconds": 67.15471670500119, "new_requests": 6540}
+{"benchmark": "arc_easy", "seconds": 42.92012299400085, "new_requests": 9496}

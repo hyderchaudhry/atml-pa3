@@ -1,0 +1,10 @@
+{
+  "model": "c1899de289a04d12100db370d81485cdf75e47ca",
+  "datasets": {
+    "metamath": "aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18",
+    "gsm8k": "740312add88f781978c0658806c59bc2815b9866",
+    "hellaswag": "218ec52e09a7e7462a5400043bb9a69a41d06b76",
+    "boolq": "3de24cf8022e94f4ee4b9d55a6f539891524d646",
+    "arc_easy": "210d026faf9955653af8916fad021475a3f00453"
+  }
+}

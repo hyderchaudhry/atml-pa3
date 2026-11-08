@@ -10,6 +10,10 @@ are used through their APIs; no public assignment solution was copied.
 This is an implementation audit, not a report or experimental analysis.
 No assignment training or benchmark evaluation was executed during this review.
 
+Subsequent Kaggle experiments are now imported under `evidence/task1`. The saved
+`completeness.json` passes all computational checks; only the 42 human annotations
+remain pending. The implementation review below predates those experiments.
+
 ## Issues found and addressed
 
 | Finding | Resolution |
@@ -80,12 +84,15 @@ Temporary artifacts are removed; the saved verification record is
 `evidence/task1/system/smoke.json`. These checks do not establish benchmark
 performance or actual full-model GPU memory use.
 
-The local machine has no CUDA. T4 kernel behavior, batch-32 memory/throughput,
-full-length model memory checks, all 20 required recovery checkpoints, all 28
-complete benchmark splits, six trained-condition diagnostics, 168 real responses
-and 42 human annotations remain to be executed/verified on Kaggle. Follow
-[task1_execution.md](task1_execution.md) in order. No experimental results,
-speedup estimates, qualitative judgments or report text are supplied here.
+The local machine has no CUDA. The subsequent Kaggle evidence includes all five
+full-length model memory checks, verified receipts for all 20 required recovery
+checkpoints, all 28 complete benchmark splits, six trained-condition diagnostics,
+168 real responses, and measured training resources. Local import checks confirmed
+the benchmark document IDs, qualitative counts, and all 1,250 ordered applied
+updates per method. Comparative GPU speedups were not measured. The 42 human
+annotations and the user's report remain pending; no qualitative judgments or
+report text are supplied here. The reproducible execution instructions remain in
+[task1_execution.md](task1_execution.md).
 
 Resumption is bounded by successful persistence: an in-flight inference batch,
 inference work since the last remote sync after session loss, and training work

@@ -2,21 +2,23 @@
 
 Task 1 is implemented. Tasks 2 and 3 are intentionally not implemented. The training loop, LoRA/OPLoRA layers, data selection, diagnostics, and evidence pipeline were written for this repository; no public assignment solution or third-party fine-tuning implementation was copied. PyTorch, Transformers, Datasets, and the required lm-evaluation-harness provide library functionality. PEFT is installed because the harness imports it, but this implementation does not use it for adapters.
 
-**Full experiments have not been run.** Local checks cover loss/gradient equivalence, staged recovery, and backup/restore failure handling with tiny models and a simulated Hub. Temporary check files are removed. Your actual runs create the benchmark results and other evidence described below. The assignment's PDF report and qualitative interpretation must be written by you, consistent with its AI usage policy.
+**Task 1 experiments are complete.** The imported Kaggle evidence in [evidence/task1](evidence/task1) contains all five training runs, seven evaluation conditions across four full benchmark splits, six trained-condition diagnostics, 168 qualitative responses, and the required tables and plots. The [saved completeness audit](evidence/task1/completeness.json) passes every computational check; the 42 human annotations remain pending. The assignment's PDF report and qualitative interpretation must be written by you, consistent with its AI usage policy.
 
 **Kaggle:** follow the [copy-and-paste guide](docs/kaggle.md): clone/install, set your backup name, then run `bash scripts/kaggle.sh run`. The launcher downloads the assignment-linked questions, chooses the remaining steps, and restores saved progress automatically. No notebook files or attached input datasets are needed for Task 1, and the training/evaluation recipe stays fixed.
 
 The [ordered Task 1 checklist](docs/task1_execution.md) provides exact commands for
 all five training variants, seven benchmark/qualitative conditions, six diagnostic
 conditions and every expected output path. The [implementation audit](docs/task1_audit.md)
-records the manual review, fixes and checks that still require your Kaggle runs.
+records the manual review, fixes, verification and execution status.
 
 Evaluation now defaults to **batch 32**, with padding-aware per-example token
 evidence, independent stock stopping, SDPA attention, KV caching and resumable
 request journals. Likelihood scoring projects only continuation hidden states in
 bounded chunks and shares identical prefixes, retaining the harness's tokenization
 and scoring semantics. Training remains **microbatch 2 × accumulation 16**.
-T4 performance is unmeasured until you run it; no speedup or benchmark score is claimed.
+Measured Kaggle training resources and benchmark scores are saved in
+[resources.csv](evidence/task1/tables/resources.csv) and
+[benchmarks.csv](evidence/task1/tables/benchmarks.csv). No comparative GPU speedup was measured.
 
 Kaggle setup selects an installed CPython 3.10–3.12 or uses uv to install isolated Python 3.11 under scratch space when the notebook's default Python is newer. It leaves the notebook kernel and pinned experiment dependencies unchanged.
 
@@ -170,7 +172,7 @@ The authoritative settings are in [config.py](src/atml/task1/config.py), also ex
 | Diagnostics | Shared original FP32 bases; down_proj layers 0/13/27; FP32 local updates on 32 math + 32 non-math fixed baseline prompt activations |
 | Qualitative | All 24 supplied prompts × seven conditions, greedy, thinking disabled, cap 512 tokens; first/last underlying questions form the fixed 42-response worksheet |
 
-If FP16 overflow skips an optimizer step, its examples are still consumed once and the prescribed data/scheduler position advances; the skip and scaler change are recorded. It is not silently retried with duplicate training data. `successful_updates` and `skipped_updates` make this visible.
+If FP16 overflow skips an optimizer attempt, the same effective batch is retried with a reduced scale and restored dropout RNG. Data and scheduler positions advance only after a successful optimizer step. `successful_updates` and `skipped_updates` record applied updates and skipped attempts separately.
 
 The L2-SP penalty is evaluated before each update, matching that update's SFT loss. Full-model displacement is measured after the required updates. A zero weight update has undefined `rho` and is recorded as JSON `null` with `zero_update=true`. Adapter diagnostics use exported FP32 projected factors before FP16 merge rounding. Merged/unmerged logits are checked on a small two-prompt batch using fixed FP16 tolerances recorded alongside actual maximum and mean errors.
 

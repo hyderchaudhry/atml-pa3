@@ -1,0 +1,510 @@
+{
+  "complete": false,
+  "checks": [
+    {
+      "requirement": "protocol.json",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "asset_lock.json",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "preparation.json",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "training_ids.json",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "probe_ids_and_prompts.json",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "task_definitions.json",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "bases.json",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "activation_cache.json",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "qualitative_prompts.json",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "first_plot_questions.yaml",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "baseline: aggregate benchmarks",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "baseline: gsm8k_cot complete per-example evidence",
+      "complete": true,
+      "detail": "1319/1319"
+    },
+    {
+      "requirement": "baseline: hellaswag complete per-example evidence",
+      "complete": true,
+      "detail": "10042/10042"
+    },
+    {
+      "requirement": "baseline: boolq complete per-example evidence",
+      "complete": true,
+      "detail": "3270/3270"
+    },
+    {
+      "requirement": "baseline: arc_easy complete per-example evidence",
+      "complete": true,
+      "detail": "2376/2376"
+    },
+    {
+      "requirement": "baseline: qualitative responses",
+      "complete": true,
+      "detail": "24/24"
+    },
+    {
+      "requirement": "full_ft_midpoint: aggregate benchmarks",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "full_ft_midpoint: gsm8k_cot complete per-example evidence",
+      "complete": true,
+      "detail": "1319/1319"
+    },
+    {
+      "requirement": "full_ft_midpoint: hellaswag complete per-example evidence",
+      "complete": true,
+      "detail": "10042/10042"
+    },
+    {
+      "requirement": "full_ft_midpoint: boolq complete per-example evidence",
+      "complete": true,
+      "detail": "3270/3270"
+    },
+    {
+      "requirement": "full_ft_midpoint: arc_easy complete per-example evidence",
+      "complete": true,
+      "detail": "2376/2376"
+    },
+    {
+      "requirement": "full_ft_midpoint: qualitative responses",
+      "complete": true,
+      "detail": "24/24"
+    },
+    {
+      "requirement": "full_ft_midpoint: FP32 diagnostics",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "full_ft_final: aggregate benchmarks",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "full_ft_final: gsm8k_cot complete per-example evidence",
+      "complete": true,
+      "detail": "1319/1319"
+    },
+    {
+      "requirement": "full_ft_final: hellaswag complete per-example evidence",
+      "complete": true,
+      "detail": "10042/10042"
+    },
+    {
+      "requirement": "full_ft_final: boolq complete per-example evidence",
+      "complete": true,
+      "detail": "3270/3270"
+    },
+    {
+      "requirement": "full_ft_final: arc_easy complete per-example evidence",
+      "complete": true,
+      "detail": "2376/2376"
+    },
+    {
+      "requirement": "full_ft_final: qualitative responses",
+      "complete": true,
+      "detail": "24/24"
+    },
+    {
+      "requirement": "full_ft_final: FP32 diagnostics",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "l2sp_final: aggregate benchmarks",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "l2sp_final: gsm8k_cot complete per-example evidence",
+      "complete": true,
+      "detail": "1319/1319"
+    },
+    {
+      "requirement": "l2sp_final: hellaswag complete per-example evidence",
+      "complete": true,
+      "detail": "10042/10042"
+    },
+    {
+      "requirement": "l2sp_final: boolq complete per-example evidence",
+      "complete": true,
+      "detail": "3270/3270"
+    },
+    {
+      "requirement": "l2sp_final: arc_easy complete per-example evidence",
+      "complete": true,
+      "detail": "2376/2376"
+    },
+    {
+      "requirement": "l2sp_final: qualitative responses",
+      "complete": true,
+      "detail": "24/24"
+    },
+    {
+      "requirement": "l2sp_final: FP32 diagnostics",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora4_final: aggregate benchmarks",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora4_final: gsm8k_cot complete per-example evidence",
+      "complete": true,
+      "detail": "1319/1319"
+    },
+    {
+      "requirement": "lora4_final: hellaswag complete per-example evidence",
+      "complete": true,
+      "detail": "10042/10042"
+    },
+    {
+      "requirement": "lora4_final: boolq complete per-example evidence",
+      "complete": true,
+      "detail": "3270/3270"
+    },
+    {
+      "requirement": "lora4_final: arc_easy complete per-example evidence",
+      "complete": true,
+      "detail": "2376/2376"
+    },
+    {
+      "requirement": "lora4_final: qualitative responses",
+      "complete": true,
+      "detail": "24/24"
+    },
+    {
+      "requirement": "lora4_final: FP32 diagnostics",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora4_final: merge verification",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora16_final: aggregate benchmarks",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora16_final: gsm8k_cot complete per-example evidence",
+      "complete": true,
+      "detail": "1319/1319"
+    },
+    {
+      "requirement": "lora16_final: hellaswag complete per-example evidence",
+      "complete": true,
+      "detail": "10042/10042"
+    },
+    {
+      "requirement": "lora16_final: boolq complete per-example evidence",
+      "complete": true,
+      "detail": "3270/3270"
+    },
+    {
+      "requirement": "lora16_final: arc_easy complete per-example evidence",
+      "complete": true,
+      "detail": "2376/2376"
+    },
+    {
+      "requirement": "lora16_final: qualitative responses",
+      "complete": true,
+      "detail": "24/24"
+    },
+    {
+      "requirement": "lora16_final: FP32 diagnostics",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora16_final: merge verification",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "oplora16_final: aggregate benchmarks",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "oplora16_final: gsm8k_cot complete per-example evidence",
+      "complete": true,
+      "detail": "1319/1319"
+    },
+    {
+      "requirement": "oplora16_final: hellaswag complete per-example evidence",
+      "complete": true,
+      "detail": "10042/10042"
+    },
+    {
+      "requirement": "oplora16_final: boolq complete per-example evidence",
+      "complete": true,
+      "detail": "3270/3270"
+    },
+    {
+      "requirement": "oplora16_final: arc_easy complete per-example evidence",
+      "complete": true,
+      "detail": "2376/2376"
+    },
+    {
+      "requirement": "oplora16_final: qualitative responses",
+      "complete": true,
+      "detail": "24/24"
+    },
+    {
+      "requirement": "oplora16_final: FP32 diagnostics",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "oplora16_final: merge verification",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "full_ft: training curve",
+      "complete": true,
+      "detail": "1250/1250"
+    },
+    {
+      "requirement": "full_ft: applied optimizer updates",
+      "complete": true,
+      "detail": "1250/1250; legacy runs that advanced on AMP skips require restarting"
+    },
+    {
+      "requirement": "full_ft: recovery checkpoint 312",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "full_ft: recovery checkpoint 625",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "full_ft: recovery checkpoint 937",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "full_ft: recovery checkpoint 1250",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "full_ft: resource measurements",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "l2sp: training curve",
+      "complete": true,
+      "detail": "1250/1250"
+    },
+    {
+      "requirement": "l2sp: applied optimizer updates",
+      "complete": true,
+      "detail": "1250/1250; legacy runs that advanced on AMP skips require restarting"
+    },
+    {
+      "requirement": "l2sp: recovery checkpoint 312",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "l2sp: recovery checkpoint 625",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "l2sp: recovery checkpoint 937",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "l2sp: recovery checkpoint 1250",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "l2sp: resource measurements",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora4: training curve",
+      "complete": true,
+      "detail": "1250/1250"
+    },
+    {
+      "requirement": "lora4: applied optimizer updates",
+      "complete": true,
+      "detail": "1250/1250; legacy runs that advanced on AMP skips require restarting"
+    },
+    {
+      "requirement": "lora4: recovery checkpoint 312",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora4: recovery checkpoint 625",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora4: recovery checkpoint 937",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora4: recovery checkpoint 1250",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora4: resource measurements",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora16: training curve",
+      "complete": true,
+      "detail": "1250/1250"
+    },
+    {
+      "requirement": "lora16: applied optimizer updates",
+      "complete": true,
+      "detail": "1250/1250; legacy runs that advanced on AMP skips require restarting"
+    },
+    {
+      "requirement": "lora16: recovery checkpoint 312",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora16: recovery checkpoint 625",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora16: recovery checkpoint 937",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora16: recovery checkpoint 1250",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "lora16: resource measurements",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "oplora16: training curve",
+      "complete": true,
+      "detail": "1250/1250"
+    },
+    {
+      "requirement": "oplora16: applied optimizer updates",
+      "complete": true,
+      "detail": "1250/1250; legacy runs that advanced on AMP skips require restarting"
+    },
+    {
+      "requirement": "oplora16: recovery checkpoint 312",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "oplora16: recovery checkpoint 625",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "oplora16: recovery checkpoint 937",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "oplora16: recovery checkpoint 1250",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "oplora16: resource measurements",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "42 human annotations",
+      "complete": false,
+      "detail": "Fill all annotation fields; write 'none' where no excerpt/issue applies."
+    },
+    {
+      "requirement": "summary table: benchmarks.csv",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "summary table: resources.csv",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "summary table: regularization.csv",
+      "complete": true,
+      "detail": ""
+    },
+    {
+      "requirement": "summary table: diagnostics.csv",
+      "complete": true,
+      "detail": ""
+    }
+  ]
+}

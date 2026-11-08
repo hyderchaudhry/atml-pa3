@@ -1,0 +1,91 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "check": "Python",
+      "passed": true,
+      "detail": "3.11.17"
+    },
+    {
+      "check": "torch",
+      "passed": true,
+      "detail": "2.6.0+cu124"
+    },
+    {
+      "check": "transformers",
+      "passed": true,
+      "detail": "4.51.3"
+    },
+    {
+      "check": "tokenizers",
+      "passed": true,
+      "detail": "0.21.4"
+    },
+    {
+      "check": "datasets",
+      "passed": true,
+      "detail": "3.6.0"
+    },
+    {
+      "check": "huggingface-hub",
+      "passed": true,
+      "detail": "0.30.2"
+    },
+    {
+      "check": "lm-eval",
+      "passed": true,
+      "detail": "0.4.9.1"
+    },
+    {
+      "check": "peft",
+      "passed": true,
+      "detail": "0.15.2"
+    },
+    {
+      "check": "accelerate",
+      "passed": true,
+      "detail": "1.6.0"
+    },
+    {
+      "check": "numpy",
+      "passed": true,
+      "detail": "2.2.5"
+    },
+    {
+      "check": "matplotlib",
+      "passed": true,
+      "detail": "3.10.1"
+    },
+    {
+      "check": "PyYAML",
+      "passed": true,
+      "detail": "6.0.2"
+    },
+    {
+      "check": "Writable output: /kaggle/working/pa3/artifacts/task1",
+      "passed": true,
+      "detail": "19.5 GiB free on filesystem; one live Full FT checkpoint needs several GiB"
+    },
+    {
+      "check": "Writable output: /kaggle/working/pa3/evidence/task1",
+      "passed": true,
+      "detail": "19.5 GiB free on filesystem; one live Full FT checkpoint needs several GiB"
+    },
+    {
+      "check": "CUDA",
+      "passed": true,
+      "detail": "runtime=12.4"
+    },
+    {
+      "check": "FP16 AMP and scaler",
+      "passed": true,
+      "detail": "toy arithmetic only; no pretrained weights or experiment steps"
+    },
+    {
+      "check": "Hub access",
+      "passed": true,
+      "detail": "model metadata reachable; no weights downloaded"
+    }
+  ],
+  "scope": "Environment checks only; peak model memory and runtime must be measured on your GPU."
+}

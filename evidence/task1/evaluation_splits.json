@@ -1,0 +1,22 @@
+{
+  "gsm8k_cot": {
+    "count": 1319,
+    "fingerprint": "59ec1b7f9357c7a2",
+    "revision": "740312add88f781978c0658806c59bc2815b9866"
+  },
+  "hellaswag": {
+    "count": 10042,
+    "fingerprint": "636451d247406586",
+    "revision": "218ec52e09a7e7462a5400043bb9a69a41d06b76"
+  },
+  "boolq": {
+    "count": 3270,
+    "fingerprint": "3465575e190d308f",
+    "revision": "3de24cf8022e94f4ee4b9d55a6f539891524d646"
+  },
+  "arc_easy": {
+    "count": 2376,
+    "fingerprint": "b019ca21ba59e1f3",
+    "revision": "210d026faf9955653af8916fad021475a3f00453"
+  }
+}

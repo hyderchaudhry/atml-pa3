@@ -1,0 +1,29 @@
+{
+  "repo": "hyderchaudhry/atml-pa3-task1",
+  "revision": "279e25d657b1b36b715e8835e6f424e3a24b3472",
+  "prefix": "checkpoints/oplora16/update_0937",
+  "files": {
+    "adapter.pt": {
+      "bytes": 40491298,
+      "sha256": "eea969fd3c6a2b9bc0e0f164f4c47b9ddd184cbe441cb4cd7741a49e382f9581",
+      "git_blob": "886fbc8d91d0da8d0699460cb97997854e6f356b"
+    },
+    "metadata.json": {
+      "bytes": 506,
+      "sha256": "330baeafb7ccbfd4f70714b022d489ffe1d0949f046c6a87662f07471f8d9c82",
+      "git_blob": "bc71197d35e98b93521690428d701590c6178df6"
+    },
+    "projected_factors.pt": {
+      "bytes": 40491738,
+      "sha256": "5aa63e80801ea3a500ba1bb58296107f241bd73b83f6def539a3dbd906d042af",
+      "git_blob": "1c12a6d7b0bfc58ade6189657e23d654cd4630ae"
+    },
+    "recovery.pt": {
+      "bytes": 81085006,
+      "sha256": "2b4645680a2bd34968e06fd6b2fdfc30283ffc854f12fd589388d549270381cf",
+      "git_blob": "fcc979021c65c3b1cd9d4abccb6e425e3a80d1c8"
+    }
+  },
+  "verified": true,
+  "upload_and_verification_seconds": 13.584212020999985
+}

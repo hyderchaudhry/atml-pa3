@@ -1,0 +1,142 @@
+{
+  "protocol": {
+    "recipe": {
+      "model": "Qwen/Qwen3-0.6B",
+      "seed": 6304,
+      "examples": 40000,
+      "updates": 1250,
+      "microbatch": 2,
+      "accumulation": 16,
+      "max_length": 2048,
+      "warmup": 38,
+      "weight_decay": 0.01,
+      "adam_betas": [
+        0.9,
+        0.999
+      ],
+      "adam_epsilon": 1e-08,
+      "clip_norm": 1.0,
+      "dropout": 0.05,
+      "protection_rank": 128,
+      "recovery_updates": [
+        312,
+        625,
+        937,
+        1250
+      ],
+      "diagnostic_layers": [
+        0,
+        13,
+        27
+      ]
+    },
+    "methods": {
+      "full_ft": {
+        "name": "full_ft",
+        "learning_rate": 2e-05,
+        "rank": 0,
+        "alpha": 0,
+        "l2_lambda": 0.0,
+        "orthogonal": false
+      },
+      "l2sp": {
+        "name": "l2sp",
+        "learning_rate": 2e-05,
+        "rank": 0,
+        "alpha": 0,
+        "l2_lambda": 0.001,
+        "orthogonal": false
+      },
+      "lora4": {
+        "name": "lora4",
+        "learning_rate": 0.0002,
+        "rank": 4,
+        "alpha": 8,
+        "l2_lambda": 0.0,
+        "orthogonal": false
+      },
+      "lora16": {
+        "name": "lora16",
+        "learning_rate": 0.0002,
+        "rank": 16,
+        "alpha": 32,
+        "l2_lambda": 0.0,
+        "orthogonal": false
+      },
+      "oplora16": {
+        "name": "oplora16",
+        "learning_rate": 0.0002,
+        "rank": 16,
+        "alpha": 32,
+        "l2_lambda": 0.0,
+        "orthogonal": true
+      }
+    },
+    "conditions": {
+      "baseline": [
+        null,
+        0
+      ],
+      "full_ft_midpoint": [
+        "full_ft",
+        625
+      ],
+      "full_ft_final": [
+        "full_ft",
+        1250
+      ],
+      "l2sp_final": [
+        "l2sp",
+        1250
+      ],
+      "lora4_final": [
+        "lora4",
+        1250
+      ],
+      "lora16_final": [
+        "lora16",
+        1250
+      ],
+      "oplora16_final": [
+        "oplora16",
+        1250
+      ]
+    },
+    "benchmarks": {
+      "gsm8k_cot": [
+        1319,
+        "exact_match,flexible-extract"
+      ],
+      "hellaswag": [
+        10042,
+        "acc_norm,none"
+      ],
+      "boolq": [
+        3270,
+        "acc,none"
+      ],
+      "arc_easy": [
+        2376,
+        "acc_norm,none"
+      ]
+    },
+    "targets": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ]
+  },
+  "method": "l2sp",
+  "resume_from": "/kaggle/working/pa3/artifacts/task1/checkpoints/l2sp/update_0937",
+  "trainable_parameters": 596049920,
+  "reference_storage_bytes": 2384199680,
+  "reference_creation_seconds": 1.8774587190018792,
+  "setup_seconds": 28.24837851799748,
+  "loss_chunk_tokens": 256,
+  "attention": "sdpa",
+  "checkpoint_repo": "hyderchaudhry/atml-pa3-task1"
+}

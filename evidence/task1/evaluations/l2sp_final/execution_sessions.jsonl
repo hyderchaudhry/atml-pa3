@@ -1,0 +1,4 @@
+{"started_unix": 1794036558.5486267, "runtime": {"generation_batch": 32, "likelihood_batch": 32, "probe_batch": 4, "attention": "sdpa"}, "benchmarks": ["gsm8k_cot"], "git_head": "996b76cf4db35ea554a7f1be2892d6a06db5400b"}
+{"started_unix": 1794038387.0884695, "runtime": {"generation_batch": 32, "likelihood_batch": 32, "probe_batch": 4, "attention": "sdpa"}, "benchmarks": ["hellaswag"], "git_head": "996b76cf4db35ea554a7f1be2892d6a06db5400b"}
+{"started_unix": 1794038864.8896942, "runtime": {"generation_batch": 32, "likelihood_batch": 32, "probe_batch": 4, "attention": "sdpa"}, "benchmarks": ["boolq"], "git_head": "996b76cf4db35ea554a7f1be2892d6a06db5400b"}
+{"started_unix": 1794039021.5544136, "runtime": {"generation_batch": 32, "likelihood_batch": 32, "probe_batch": 4, "attention": "sdpa"}, "benchmarks": ["arc_easy"], "git_head": "996b76cf4db35ea554a7f1be2892d6a06db5400b"}

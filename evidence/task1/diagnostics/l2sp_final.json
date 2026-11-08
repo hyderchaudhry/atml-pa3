@@ -1,0 +1,1228 @@
+{
+  "condition": "l2sp_final",
+  "dtype": "float32",
+  "protection_rank": 128,
+  "layers": [
+    {
+      "layer": 0,
+      "rho": 0.13198567926883698,
+      "eta": 0.011390404775738716,
+      "zero_update": false,
+      "activation": {
+        "gsm8k_cot": {
+          "mean": 0.045915648341178894,
+          "median": 0.045906126499176025,
+          "std": 0.00031891759135760367,
+          "count": 32
+        },
+        "hellaswag": {
+          "mean": 0.02370867319405079,
+          "median": 0.024840638041496277,
+          "std": 0.0029494394548237324,
+          "count": 32
+        }
+      },
+      "left_constraint_relative": 0.36332133412361145,
+      "right_constraint_relative": 0.2143135964870453
+    },
+    {
+      "layer": 13,
+      "rho": 0.1500535011291504,
+      "eta": 0.013678841292858124,
+      "zero_update": false,
+      "activation": {
+        "gsm8k_cot": {
+          "mean": 0.0452781580388546,
+          "median": 0.0452304370701313,
+          "std": 0.0008692940464243293,
+          "count": 32
+        },
+        "hellaswag": {
+          "mean": 0.02777263894677162,
+          "median": 0.02710517682135105,
+          "std": 0.0030552661046385765,
+          "count": 32
+        }
+      },
+      "left_constraint_relative": 0.3873903751373291,
+      "right_constraint_relative": 0.19718019664287567
+    },
+    {
+      "layer": 27,
+      "rho": 0.1070346012711525,
+      "eta": 0.007833130657672882,
+      "zero_update": false,
+      "activation": {
+        "gsm8k_cot": {
+          "mean": 0.019073104485869408,
+          "median": 0.0188057329505682,
+          "std": 0.0015583713538944721,
+          "count": 32
+        },
+        "hellaswag": {
+          "mean": 0.02536867931485176,
+          "median": 0.025659430772066116,
+          "std": 0.0014350167475640774,
+          "count": 32
+        }
+      },
+      "left_constraint_relative": 0.32718801498413086,
+      "right_constraint_relative": 0.2059207409620285
+    }
+  ],
+  "per_probe": [
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 876,
+      "R": 0.04519285634160042
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 1232,
+      "R": 0.04579394310712814
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 778,
+      "R": 0.04592496156692505
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 1242,
+      "R": 0.045874275267124176
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 871,
+      "R": 0.046121761202812195
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 1094,
+      "R": 0.04623667150735855
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 816,
+      "R": 0.04570753499865532
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 788,
+      "R": 0.04603813588619232
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 325,
+      "R": 0.04617583751678467
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 1264,
+      "R": 0.04617979750037193
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 198,
+      "R": 0.04639029875397682
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 1179,
+      "R": 0.045621827244758606
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 365,
+      "R": 0.04574468359351158
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 554,
+      "R": 0.04549742862582207
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 9,
+      "R": 0.04650132730603218
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 769,
+      "R": 0.04583268612623215
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 0,
+      "R": 0.04590747877955437
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 568,
+      "R": 0.04533632844686508
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 821,
+      "R": 0.046491142362356186
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 233,
+      "R": 0.04583168029785156
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 929,
+      "R": 0.04580007866024971
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 474,
+      "R": 0.0459548644721508
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 1182,
+      "R": 0.04576798900961876
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 267,
+      "R": 0.04617072269320488
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 1314,
+      "R": 0.045663729310035706
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 1118,
+      "R": 0.04534289240837097
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 502,
+      "R": 0.046029336750507355
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 672,
+      "R": 0.04610200971364975
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 1302,
+      "R": 0.04632981866598129
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 1218,
+      "R": 0.046017374843358994
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 335,
+      "R": 0.0458151176571846
+    },
+    {
+      "layer": 0,
+      "task": "gsm8k_cot",
+      "doc_id": 811,
+      "R": 0.045906126499176025
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 5143,
+      "R": 0.024954402819275856
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 4353,
+      "R": 0.024840638041496277
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 4219,
+      "R": 0.024612102657556534
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 4011,
+      "R": 0.026380648836493492
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 9663,
+      "R": 0.02432955801486969
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 2674,
+      "R": 0.016174033284187317
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 9856,
+      "R": 0.02529633790254593
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 3540,
+      "R": 0.025265635922551155
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 9364,
+      "R": 0.025264136493206024
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 426,
+      "R": 0.017640825361013412
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 8497,
+      "R": 0.02420431189239025
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 9299,
+      "R": 0.02455984801054001
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 8935,
+      "R": 0.02463355101644993
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 6139,
+      "R": 0.02629135549068451
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 5429,
+      "R": 0.025630231946706772
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 385,
+      "R": 0.01791147142648697
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 3539,
+      "R": 0.025117699056863785
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 751,
+      "R": 0.02399737760424614
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 7732,
+      "R": 0.026028769090771675
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 2402,
+      "R": 0.017476851120591164
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 5426,
+      "R": 0.02521415613591671
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 895,
+      "R": 0.02155349962413311
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 3620,
+      "R": 0.024419575929641724
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 2194,
+      "R": 0.01710159331560135
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 1424,
+      "R": 0.02495194412767887
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 7469,
+      "R": 0.02485940419137478
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 5396,
+      "R": 0.025528734549880028
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 6176,
+      "R": 0.025278540328145027
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 4864,
+      "R": 0.024317162111401558
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 8751,
+      "R": 0.025337310507893562
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 8549,
+      "R": 0.025274032726883888
+    },
+    {
+      "layer": 0,
+      "task": "hellaswag",
+      "doc_id": 8657,
+      "R": 0.024231843650341034
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 876,
+      "R": 0.042960867285728455
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 1232,
+      "R": 0.045080672949552536
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 778,
+      "R": 0.04532948508858681
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 1242,
+      "R": 0.045159440487623215
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 871,
+      "R": 0.04460414871573448
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 1094,
+      "R": 0.0452958382666111
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 816,
+      "R": 0.046663567423820496
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 788,
+      "R": 0.04680183157324791
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 325,
+      "R": 0.04464422166347504
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 1264,
+      "R": 0.04363734647631645
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 198,
+      "R": 0.044639941304922104
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 1179,
+      "R": 0.046199653297662735
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 365,
+      "R": 0.04580507054924965
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 554,
+      "R": 0.045401960611343384
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 9,
+      "R": 0.0456523559987545
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 769,
+      "R": 0.04504011943936348
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 0,
+      "R": 0.044846393167972565
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 568,
+      "R": 0.04423254728317261
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 821,
+      "R": 0.04493674635887146
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 233,
+      "R": 0.04583824425935745
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 929,
+      "R": 0.04624002426862717
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 474,
+      "R": 0.04583553597331047
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 1182,
+      "R": 0.04647994786500931
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 267,
+      "R": 0.0451359860599041
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 1314,
+      "R": 0.045094698667526245
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 1118,
+      "R": 0.0452304370701313
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 502,
+      "R": 0.04562931880354881
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 672,
+      "R": 0.04407815262675285
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 1302,
+      "R": 0.046268533915281296
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 1218,
+      "R": 0.044422540813684464
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 335,
+      "R": 0.045670218765735626
+    },
+    {
+      "layer": 13,
+      "task": "gsm8k_cot",
+      "doc_id": 811,
+      "R": 0.04604511335492134
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 5143,
+      "R": 0.02900397777557373
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 4353,
+      "R": 0.02619674615561962
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 4219,
+      "R": 0.032465457916259766
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 4011,
+      "R": 0.02760927751660347
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 9663,
+      "R": 0.0279138945043087
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 2674,
+      "R": 0.022542402148246765
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 9856,
+      "R": 0.027801891788840294
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 3540,
+      "R": 0.026735909283161163
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 9364,
+      "R": 0.02645094506442547
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 426,
+      "R": 0.025999832898378372
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 8497,
+      "R": 0.030091451480984688
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 9299,
+      "R": 0.02710517682135105
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 8935,
+      "R": 0.024785468354821205
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 6139,
+      "R": 0.02356472797691822
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 5429,
+      "R": 0.03043878823518753
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 385,
+      "R": 0.031208550557494164
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 3539,
+      "R": 0.02820100076496601
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 751,
+      "R": 0.029626816511154175
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 7732,
+      "R": 0.03185046836733818
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 2402,
+      "R": 0.024815810844302177
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 5426,
+      "R": 0.0259365476667881
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 895,
+      "R": 0.027854356914758682
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 3620,
+      "R": 0.02610771730542183
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 2194,
+      "R": 0.024049878120422363
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 1424,
+      "R": 0.02620195411145687
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 7469,
+      "R": 0.030955275520682335
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 5396,
+      "R": 0.02531590685248375
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 6176,
+      "R": 0.03670059144496918
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 4864,
+      "R": 0.023716118186712265
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 8751,
+      "R": 0.029906388372182846
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 8549,
+      "R": 0.02675865776836872
+    },
+    {
+      "layer": 13,
+      "task": "hellaswag",
+      "doc_id": 8657,
+      "R": 0.03081243298947811
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 876,
+      "R": 0.021054910495877266
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 1232,
+      "R": 0.0188057329505682
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 778,
+      "R": 0.01648513413965702
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 1242,
+      "R": 0.020867247134447098
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 871,
+      "R": 0.01840028166770935
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 1094,
+      "R": 0.020965173840522766
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 816,
+      "R": 0.020574042573571205
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 788,
+      "R": 0.020391996949911118
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 325,
+      "R": 0.017937548458576202
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 1264,
+      "R": 0.018864339217543602
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 198,
+      "R": 0.018662292510271072
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 1179,
+      "R": 0.022105248644948006
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 365,
+      "R": 0.017735807225108147
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 554,
+      "R": 0.018930375576019287
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 9,
+      "R": 0.019709281623363495
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 769,
+      "R": 0.017080143094062805
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 0,
+      "R": 0.02046421356499195
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 568,
+      "R": 0.01702280528843403
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 821,
+      "R": 0.020361434668302536
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 233,
+      "R": 0.018138272687792778
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 929,
+      "R": 0.016978370025753975
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 474,
+      "R": 0.01738392934203148
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 1182,
+      "R": 0.019467176869511604
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 267,
+      "R": 0.01783962920308113
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 1314,
+      "R": 0.018820134922862053
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 1118,
+      "R": 0.018761122599244118
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 502,
+      "R": 0.021692613139748573
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 672,
+      "R": 0.01774178445339203
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 1302,
+      "R": 0.021601008251309395
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 1218,
+      "R": 0.018419625237584114
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 335,
+      "R": 0.01969817653298378
+    },
+    {
+      "layer": 27,
+      "task": "gsm8k_cot",
+      "doc_id": 811,
+      "R": 0.017379477620124817
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 5143,
+      "R": 0.02586684189736843
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 4353,
+      "R": 0.026766501367092133
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 4219,
+      "R": 0.025254422798752785
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 4011,
+      "R": 0.02490852028131485
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 9663,
+      "R": 0.026368597522377968
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 2674,
+      "R": 0.023521319031715393
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 9856,
+      "R": 0.02592143416404724
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 3540,
+      "R": 0.02666063793003559
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 9364,
+      "R": 0.025317570194602013
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 426,
+      "R": 0.02429160289466381
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 8497,
+      "R": 0.0244994405657053
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 9299,
+      "R": 0.02430282160639763
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 8935,
+      "R": 0.02553713507950306
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 6139,
+      "R": 0.026274845004081726
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 5429,
+      "R": 0.02607686258852482
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 385,
+      "R": 0.022343823686242104
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 3539,
+      "R": 0.02540653944015503
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 751,
+      "R": 0.025135014206171036
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 7732,
+      "R": 0.025898238644003868
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 2402,
+      "R": 0.021912094205617905
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 5426,
+      "R": 0.024727536365389824
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 895,
+      "R": 0.023937147110700607
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 3620,
+      "R": 0.02610190212726593
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 2194,
+      "R": 0.022135555744171143
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 1424,
+      "R": 0.025659430772066116
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 7469,
+      "R": 0.025920933112502098
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 5396,
+      "R": 0.02583438716828823
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 6176,
+      "R": 0.026563413441181183
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 4864,
+      "R": 0.027742525562644005
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 8751,
+      "R": 0.027079090476036072
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 8549,
+      "R": 0.026496581733226776
+    },
+    {
+      "layer": 27,
+      "task": "hellaswag",
+      "doc_id": 8657,
+      "R": 0.027334917336702347
+    }
+  ],
+  "scope": "Same cached starting-model activations; measures local updates only."
+}

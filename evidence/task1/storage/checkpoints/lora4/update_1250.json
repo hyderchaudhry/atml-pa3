@@ -1,0 +1,29 @@
+{
+  "repo": "hyderchaudhry/atml-pa3-task1",
+  "revision": "1f85804877edc34d5af833c6658ec933be49ef90",
+  "prefix": "checkpoints/lora4/update_1250",
+  "files": {
+    "adapter.pt": {
+      "bytes": 10213666,
+      "sha256": "760d62eb65624c00de9d10638c21379a02f0db35b050a39d4193ed8eb2d2ded3",
+      "git_blob": "999a27518caad6fa9a8dfbb4dde350d55d1ee248"
+    },
+    "metadata.json": {
+      "bytes": 507,
+      "sha256": "19eb75ef995df32aeafc90a6f4885d83d42104ef0e03ed6ef46cd82d1b6f7278",
+      "git_blob": "1fb7cfe392007eebf931db484e07b530228c15bc"
+    },
+    "projected_factors.pt": {
+      "bytes": 10214106,
+      "sha256": "590ba17d372a84e9cd79e9e59dff751a3872ff289dc201e7c78f20c55629dea5",
+      "git_blob": "1d1cab44846cd6a2fd7b4606fe2b8c407b93152e"
+    },
+    "recovery.pt": {
+      "bytes": 20529678,
+      "sha256": "ab0b1ba986ebe57e552f8393debc1843a429ab87a1a8bc85a074402da96ee92a",
+      "git_blob": "0b91bfa58991ce9d252dbc4476de9ad48f6a25da"
+    }
+  },
+  "verified": true,
+  "upload_and_verification_seconds": 3.1084458830000585
+}

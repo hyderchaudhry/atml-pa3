@@ -1,0 +1,15 @@
+{
+  "counts": {
+    "examined": 40002,
+    "overlength": 2
+  },
+  "retained": 40000,
+  "training_ids_sha256": "df54560943ec6f7841c1e970f4ab70bcd83eb2558692a68026aef1a808f11de5",
+  "dataset_fingerprint": "6e693d0b641a499a",
+  "normalization": "Unicode NFKC, casefold, remove Unicode punctuation and whitespace",
+  "train_files": {
+    "dataset_info.json": "ca54a009b77f62cf66ff7e582dfc7b18d4e7a0caf99fad494bb85970bc4f285f",
+    "state.json": "39669a6bc3a4a45719ab6f9fae9702c45dbdf5cee57b66a9e5e12e0add1ea910",
+    "data-00000-of-00001.arrow": "aa9014fe0bc131dce1193cf966383deb4299c5d917c881b197d49f5346346e3e"
+  }
+}

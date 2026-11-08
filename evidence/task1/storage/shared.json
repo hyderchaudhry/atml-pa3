@@ -1,0 +1,62 @@
+{
+  "repo": "hyderchaudhry/atml-pa3-task1",
+  "revision": "258772d2c21eb17f98120d2f5bbfd74964395848",
+  "files": {
+    "prepared/data-00000-of-00001.arrow": {
+      "bytes": 119705840,
+      "sha256": "aa9014fe0bc131dce1193cf966383deb4299c5d917c881b197d49f5346346e3e",
+      "git_blob": "7180e1fd06dcb95c01f9931e5df215b158d448a3"
+    },
+    "prepared/dataset_info.json": {
+      "bytes": 355,
+      "sha256": "ca54a009b77f62cf66ff7e582dfc7b18d4e7a0caf99fad494bb85970bc4f285f",
+      "git_blob": "a5ae2ce8394d91f7bafa3b7fbfd4bc2c8915a991"
+    },
+    "prepared/state.json": {
+      "bytes": 247,
+      "sha256": "39669a6bc3a4a45719ab6f9fae9702c45dbdf5cee57b66a9e5e12e0add1ea910",
+      "git_blob": "4d16d0e7174794c752ebbd98a89b2a18ab17ac14"
+    },
+    "tokenizer/added_tokens.json": {
+      "bytes": 707,
+      "sha256": "c0284b582e14987fbd3d5a2cb2bd139084371ed9acbae488829a1c900833c680",
+      "git_blob": "b54f9135e44c1e81047e8d05cb027af8bc039eed"
+    },
+    "tokenizer/merges.txt": {
+      "bytes": 1671853,
+      "sha256": "8831e4f1a044471340f7c0a83d7bd71306a5b867e95fd870f74d0c5308a904d5",
+      "git_blob": "31349551d90c7606f325fe0f11bbb8bd5fa0d7c7"
+    },
+    "tokenizer/special_tokens_map.json": {
+      "bytes": 613,
+      "sha256": "76862e765266b85aa9459767e33cbaf13970f327a0e88d1c65846c2ddd3a1ecd",
+      "git_blob": "ac23c0aaa2434523c494330aeb79c58395378103"
+    },
+    "tokenizer/tokenizer.json": {
+      "bytes": 11422654,
+      "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+      "git_blob": "949e1ec83f61520a25c75426edc4a43acc36f29a"
+    },
+    "tokenizer/tokenizer_config.json": {
+      "bytes": 9762,
+      "sha256": "3c0884a30471f4f542dc89630f62a380bb70a341fafda826136a7be921fec7ea",
+      "git_blob": "3fb43942263a11337702b048c26ece71cdd7cfa1"
+    },
+    "tokenizer/vocab.json": {
+      "bytes": 2776833,
+      "sha256": "ca10d7e9fb3ed18575dd1e277a2579c16d108e32f27439684afa0e10b1440910",
+      "git_blob": "4783fe10ac3adce15ac8f358ef5462739852c569"
+    },
+    "bases.pt": {
+      "bytes": 323050378,
+      "sha256": "6f5f9f91d523f942f56791973d34716f024d5b28ae460e7141d226b62f60e417",
+      "git_blob": "6ff7d6d313ef8bc504b04d4c43166a22452a2380"
+    },
+    "baseline_activations.pt": {
+      "bytes": 2361135,
+      "sha256": "8787c6f16bc9efa89ae881bdeacbcd326795a509a5e8dc2ec01f242ae43c4c2f",
+      "git_blob": "1f3801df9af204ef9a517fdaaa256c9fa07e4e13"
+    }
+  },
+  "verified": true
+}

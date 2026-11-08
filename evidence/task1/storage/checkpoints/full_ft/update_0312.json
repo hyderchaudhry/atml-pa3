@@ -1,0 +1,24 @@
+{
+  "repo": "hyderchaudhry/atml-pa3-task1",
+  "revision": "559697cbf1b152d586f9de2dc4ba346a8b838822",
+  "prefix": "checkpoints/full_ft/update_0312",
+  "files": {
+    "metadata.json": {
+      "bytes": 506,
+      "sha256": "0ce953653f1a8f5a218bfa6059e778e22cf405512ba673ebc0c2c7110d09c589",
+      "git_blob": "2147ba194fdedd9041f848cf4f1f5f35d665d8bd"
+    },
+    "model.pt": {
+      "bytes": 2384277458,
+      "sha256": "34ac578a2e01ec7f0a3761e1a6687bfa786982b605ad0080e4126662fecf0151",
+      "git_blob": "2ec151be10937ead74b57fda6c1f2090a7d2ca4b"
+    },
+    "recovery.pt": {
+      "bytes": 4768680289,
+      "sha256": "75417a52e6270b9739904f8ceb42207dcb5f790dd33a58ad74556bd4528a5e78",
+      "git_blob": "18ae9f62b0de86d42920a914ef47a2092c0be2b8"
+    }
+  },
+  "verified": true,
+  "upload_and_verification_seconds": 134.1587388199996
+}

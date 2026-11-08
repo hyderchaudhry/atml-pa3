@@ -1,0 +1,22 @@
+{
+  "selection": "First and last questions in supplied YAML plain-question order; all formats and conditions",
+  "expected_responses": 42,
+  "status": "Fill annotations.csv yourself; empty cells are incomplete evidence",
+  "fields": [
+    "format_compliance",
+    "coherence_relevance",
+    "repetition",
+    "unnecessary_math",
+    "inappropriate_content",
+    "short_excerpt",
+    "notes"
+  ],
+  "values": {
+    "format_compliance": "pass / partial / fail / not_applicable",
+    "coherence_relevance": "pass / partial / fail",
+    "repetition": "none / mild / severe",
+    "unnecessary_math": "none / present",
+    "inappropriate_content": "none / present"
+  },
+  "excerpts": "Use short supporting excerpts; document your rule for selecting report illustrations in notes."
+}

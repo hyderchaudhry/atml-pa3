@@ -1,0 +1,24 @@
+{
+  "repo": "hyderchaudhry/atml-pa3-task1",
+  "revision": "1368390c81ea2dda2e99448d62f56c3d81f38327",
+  "prefix": "checkpoints/l2sp/update_0937",
+  "files": {
+    "metadata.json": {
+      "bytes": 543,
+      "sha256": "06108bed7eee15d031a68956a1af115a8e4f48d46a66b18e9aded686ecab95c7",
+      "git_blob": "b2686006fc813079ca13f804ff2893bc83648e7d"
+    },
+    "model.pt": {
+      "bytes": 2384277458,
+      "sha256": "5f8a7bdf36f82d33141447d63f4f8875847c32e884a33e5c05fc95075a107d36",
+      "git_blob": "c179aa8eb322c24d5c66bf0c9a4ceea6951c2e21"
+    },
+    "recovery.pt": {
+      "bytes": 4768680289,
+      "sha256": "442d6f3e4c8f9be67838645ace906122f376134ca17576533a51f26c0015aa51",
+      "git_blob": "70c03930f66ea9975fde46a793ab28a4fd2c19cb"
+    }
+  },
+  "verified": true,
+  "upload_and_verification_seconds": 134.40163977299744
+}

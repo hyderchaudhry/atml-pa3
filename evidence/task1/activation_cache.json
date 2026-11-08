@@ -1,0 +1,20 @@
+{
+  "sha256": "8787c6f16bc9efa89ae881bdeacbcd326795a509a5e8dc2ec01f242ae43c4c2f",
+  "probe_manifest_sha256": "d2bb4885456514126a061d157ec8142a6d8feef930269805e10b3afc5d16cc65",
+  "dtype": "float32",
+  "position": "last non-padding prompt token; before continuation",
+  "shapes": {
+    "0": [
+      64,
+      3072
+    ],
+    "13": [
+      64,
+      3072
+    ],
+    "27": [
+      64,
+      3072
+    ]
+  }
+}

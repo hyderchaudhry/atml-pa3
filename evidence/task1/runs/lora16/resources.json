@@ -1,0 +1,11 @@
+{
+  "train_seconds": 16950.21051539199,
+  "checkpoint_seconds": 1.4329677660025482,
+  "regularization_seconds": 0.0,
+  "reference_transfer_seconds": 0.0,
+  "reference_transfer_bytes": 0,
+  "export_seconds": 0.6421842030031257,
+  "skipped_updates": 0,
+  "successful_updates": 1250,
+  "peak_gpu_bytes": 2150965248
+}

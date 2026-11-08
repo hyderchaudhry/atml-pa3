@@ -1,0 +1,9 @@
+{
+  "method": "lora4",
+  "microbatch": 2,
+  "sequence_length": 2048,
+  "scope": "Synthetic memory check; no data, models, or scores saved",
+  "passed": true,
+  "peak_gpu_bytes": 2025903616,
+  "gpu_bytes": 15636037632
+}
