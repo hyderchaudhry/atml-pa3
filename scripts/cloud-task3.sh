@@ -19,9 +19,26 @@ export PYTHONPATH="$REPO_DIR/src${PYTHONPATH:+:$PYTHONPATH}"
 VENV_DIR="$PA3_ROOT/venv-task3"
 command="${1:-run}"
 if [[ "$command" == setup ]]; then
-    python="${PA3_PYTHON:-python3.11}"
-    "$python" -c 'import sys; assert (3,10) <= sys.version_info[:2] < (3,13), "Use CPython 3.10–3.12"'
-    "$python" -m venv "$VENV_DIR"
+    task3_python=""
+    if [[ -n "${PA3_PYTHON:-}" ]]; then
+        task3_candidates=("$PA3_PYTHON")
+    else
+        task3_candidates=(python3.11 python3.12 python3.10 python3 python)
+    fi
+    for task3_candidate in "${task3_candidates[@]}"; do
+        if command -v "$task3_candidate" >/dev/null 2>&1 && \
+            "$task3_candidate" -c 'import sys; sys.exit(0 if sys.implementation.name == "cpython" and (3,10) <= sys.version_info[:2] < (3,13) else 1)' 2>/dev/null; then
+            task3_python="$task3_candidate"
+            break
+        fi
+    done
+    if [[ -z "$task3_python" ]]; then
+        echo '[setup] No compatible Python found. Use CPython 3.10–3.12.' >&2
+        echo '[setup] Set PA3_PYTHON to a compatible interpreter path, then rerun setup.' >&2
+        exit 1
+    fi
+    echo "[setup] Using $task3_python"
+    "$task3_python" -m venv "$VENV_DIR"
     "$VENV_DIR/bin/python" -m pip install --upgrade 'pip==25.1.1'
     "$VENV_DIR/bin/python" -m pip install 'torch==2.6.0' --index-url https://download.pytorch.org/whl/cu124
     "$VENV_DIR/bin/python" -m pip install -r "$REPO_DIR/requirements-task3.txt"

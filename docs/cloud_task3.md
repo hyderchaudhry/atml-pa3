@@ -19,7 +19,7 @@ bash scripts/cloud-task3.sh doctor
 bash scripts/cloud-task3.sh smoke
 ```
 
-Use your writable Hugging Face namespace. `auth` asks for a Write token through a hidden prompt. Backups must be a **private dataset**. Keep Task 1, 2 and 3 output roots and backup repositories separate. If needed, set `PA3_PYTHON=python3` before setup, using a supported interpreter. The launcher creates `$PA3_ROOT/venv-task3` and records `environment-freeze.txt`. Package pins are in [requirements-task3.txt](../requirements-task3.txt).
+Use your writable Hugging Face namespace. `auth` asks for a Write token through a hidden prompt. Backups must be a **private dataset**. Keep Task 1, 2 and 3 output roots and backup repositories separate. Setup automatically finds an installed CPython 3.10–3.12, preferring 3.11. To select one explicitly, run `PA3_PYTHON=python3 bash scripts/cloud-task3.sh setup`, or set `PA3_PYTHON` to its executable path. An explicit incompatible selection fails with a clear message. The launcher creates `$PA3_ROOT/venv-task3` and records `environment-freeze.txt`. Package pins are in [requirements-task3.txt](../requirements-task3.txt).
 
 The launcher sets persistent Hugging Face, Matplotlib and download caches under `$PA3_ROOT/cache`. To share an existing model cache on the same persistent mount, set `PA3_HF_HOME` before commands. It also selects Matplotlib's non-interactive Agg backend before importing Matplotlib, including in notebook-based templates.
 
@@ -110,7 +110,7 @@ There are no optimizer checkpoints because Task 3 does not train. No completed r
 bash scripts/cloud-task3.sh restore
 ```
 
-HF uploads are incremental, in batches of at most 32 files. Remote sizes and SHA-256/LFS or Git blob hashes are checked before publishing an inventory referencing immutable commits. Failure leaves local progress intact and stops the workflow; retry the command or `backup`. Restore rechecks content and refuses to overwrite conflicting local files. Source/scorer/order/implementation fingerprints guard result reuse; GPU UUID checks prevent mixing physical devices in the live comparison. Execution sessions are retained separately. No model weights are duplicated into the evidence backup because the original model is revision-pinned in HF's cache.
+HF uploads are incremental, in batches of at most 32 files with one concurrent file upload. Remote sizes and SHA-256/LFS or Git blob hashes are checked before publishing an inventory referencing immutable commits. Transient network failures, HTTP 408/429 and common server errors receive up to four attempts with bounded backoff. The underlying failure is printed with signed URL queries and token strings redacted; permanent permission/quota errors are not blindly retried. Each verified batch is recorded locally in `artifacts/task3/backup_progress.json`, so a later failed batch can resume without re-uploading earlier verified batches. The published recovery inventory advances only after all files are verified. Failure leaves local progress intact and stops the workflow; retry the command or `backup`. Restore rechecks content and refuses to overwrite conflicting local files. Source/scorer/order/implementation fingerprints guard result reuse; GPU UUID checks prevent mixing physical devices in the live comparison. Execution sessions are retained separately. No model weights are duplicated into the evidence backup because the original model is revision-pinned in HF's cache.
 
 ## Evidence and download
 

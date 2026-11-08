@@ -148,6 +148,10 @@ def ingest_file(conn, file, dataset, component, expected_rows=32000):
     digest = sha256(file)
     previous = conn.execute("SELECT digest,rows FROM ingest WHERE path=?", (str(file),)).fetchone()
     cursor = previous[1] if previous else 0
+    print(
+        f"[prepare] Importing {dataset}/{component}: {cursor:,}/{expected_rows:,} committed rows",
+        flush=True,
+    )
     if previous and previous[0] != digest:
         raise ValueError("Supplied source changed during ingestion")
     parquet = pq.ParquetFile(file)
@@ -186,6 +190,11 @@ def ingest_file(conn, file, dataset, component, expected_rows=32000):
                 )
             conn.execute("INSERT OR REPLACE INTO ingest VALUES(?,?,?)", (str(file), digest, end))
         offset = end
+        if offset // 4096 != (offset - len(batch)) // 4096 or offset == expected_rows:
+            print(
+                f"[prepare] {dataset}/{component}: {offset:,}/{expected_rows:,} rows committed",
+                flush=True,
+            )
     return dict(
         sha256=digest,
         bytes=file.stat().st_size,
@@ -323,6 +332,7 @@ def prepare(paths, source=None, metadata=None, expected_questions=1000):
         raise ValueError("Exact original MATH model revision missing from supplied README.MD")
     paths.evidence.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(readme, paths.evidence / "supplied_README.MD")
+    print("[prepare] Resolving released MathVista metadata", flush=True)
     metadata = Path(metadata) if metadata else fetch_metadata(paths)
     target = paths.artifacts / "metadata/testmini.json"
     if metadata.resolve() != target.resolve():
@@ -376,7 +386,10 @@ def prepare(paths, source=None, metadata=None, expected_questions=1000):
             key: [order_rng.permutation(32).tolist() for _ in range(10)] for key in keys
         }
         statistics[dataset] = dict(retained_tokens=0, capped_rollouts=0, null_extractions=0)
-        for key in keys:
+        print(
+            f"[prepare] Validating {dataset}: {len(keys):,} questions, 32 rollouts each", flush=True
+        )
+        for position, key in enumerate(keys, 1):
             # Validate shapes, IDs and references before declaring preparation complete.
             generations, *_ = validated_arrays(source_rows(conn, dataset, key), dataset)
             for g in generations:
@@ -391,6 +404,11 @@ def prepare(paths, source=None, metadata=None, expected_questions=1000):
                     raise ValueError("Released multiple-choice options missing")
                 if meta["answer_type"] == "float" and meta.get("precision") is None:
                     raise ValueError("Released float precision missing")
+            if position % 100 == 0 or position == len(keys):
+                print(
+                    f"[prepare] {dataset}: {position:,}/{len(keys):,} questions validated",
+                    flush=True,
+                )
         if expected_questions == 1000:
             label = "MATH" if dataset == "math" else "MathVista"
             declared = re.search(
@@ -400,6 +418,7 @@ def prepare(paths, source=None, metadata=None, expected_questions=1000):
                 statistics[dataset].values()
             ):
                 raise ValueError(f"Supplied {dataset} totals disagree with its README")
+    print("[prepare] Compacting and hashing prepared source cache", flush=True)
     conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
     conn.execute("VACUUM")
     conn.close()

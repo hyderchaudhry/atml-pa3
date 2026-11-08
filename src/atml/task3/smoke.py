@@ -6,7 +6,7 @@ import tempfile
 from types import SimpleNamespace
 from contextlib import ExitStack
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 import pyarrow as pa
@@ -51,7 +51,7 @@ from .selection import (
     visible_groups,
     vote,
 )
-from .storage import backup, restore, safe_relative
+from .storage import backup, failure_details, restore, retry_upload, safe_relative
 from .summary import export, summarize
 
 
@@ -661,6 +661,18 @@ def smoke():
             "live shared-initial accounting, strategy results, headless figures/tables/gallery/ZIP and honest completeness audit"
         )
         hub = MemoryHub(base / "mock-remote")
+        from requests.exceptions import Timeout
+
+        retry_operation = Mock(
+            side_effect=[Timeout("synthetic upload timeout"), "recovered"]
+        )
+        with patch("atml.task3.storage.time.sleep") as sleep:
+            assert retry_upload("synthetic retry", retry_operation) == "recovered"
+            sleep.assert_called_once_with(2)
+        assert retry_operation.call_count == 2
+        denied = RuntimeError("synthetic denied upload")
+        denied.response = SimpleNamespace(status_code=403)
+        assert not failure_details(denied)["transient"]
         with (
             patch("atml.task3.storage.HfApi", return_value=hub),
             patch("atml.task3.storage.hf_hub_download", side_effect=hub.download),
