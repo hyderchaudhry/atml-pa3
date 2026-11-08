@@ -1,0 +1,15 @@
+{
+  "rule": "first five live question IDs, plus first two in the saved order for each revision transition",
+  "fixed": [
+    "test:943",
+    "test:2688",
+    "test:3504",
+    "test:4335",
+    "test:2460"
+  ],
+  "wrong_to_correct": [
+    "test:2460",
+    "test:2358"
+  ],
+  "correct_to_wrong": []
+}

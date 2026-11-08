@@ -1,0 +1,6 @@
+{
+  "model": "Qwen/Qwen2.5-3B-Instruct",
+  "model_revision": "aa8e72537993ba99e69dfaafa59ed015b17504d1",
+  "supplied_readme_sha256": "737f834ff66a031e226149066d97b7c38919f5c2f196906a5de037a42ac87241",
+  "metadata_sha256": "ab0148dca9d401c31cc47f29b3826eec28a76ff155a1c0878d81e8daf0413480"
+}

@@ -1,0 +1,42 @@
+{
+  "trajectory_rule": "first three held-out question IDs in saved permutation; first two rollout IDs in saved order 0",
+  "case_rule": "first two question IDs in saved held-out permutation satisfying each named retrospective condition",
+  "cases": {
+    "math": {
+      "disagreement": [
+        "test:943",
+        "test:2688"
+      ],
+      "sampling_failure": [
+        "test:2892",
+        "test:4549"
+      ],
+      "selection_failure": [
+        "test:3504",
+        "test:2460"
+      ],
+      "premature_stop": [
+        "test:3504",
+        "test:2460"
+      ]
+    },
+    "mathvista": {
+      "disagreement": [
+        "99",
+        "425"
+      ],
+      "sampling_failure": [
+        "601",
+        "310"
+      ],
+      "selection_failure": [
+        "425",
+        "379"
+      ],
+      "premature_stop": [
+        "358",
+        "821"
+      ]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "math_verify": "0.8.0",
+  "sympy": "1.13.1",
+  "latex_parser": "1.10.2",
+  "implementation_sha256": "8862762e45f4b70524e52b1d59580bf039f08c3a46e9229b67b54ca458e9eeba",
+  "mathvista_metadata_sha256": "ab0148dca9d401c31cc47f29b3826eec28a76ff155a1c0878d81e8daf0413480",
+  "mathvista_rules": "option letters/closest-choice text, integer conversion, declared float precision; missing is NO_ANSWER"
+}

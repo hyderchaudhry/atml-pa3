@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "source": "https://drive.google.com/drive/folders/1utX-Gfi9vvaoi1mi0pzNpDGL1o1fAh23",
+  "files": {
+    "qwen25-math/generations.parquet": {
+      "sha256": "ffdecd753a2c0183b811d5679f3cf15e91bce46d1aacb196e28afb553d7e1c84",
+      "bytes": 26932880,
+      "rows": 32000,
+      "schema": "dataset: string not null\nmodel: string not null\nsample_id: string not null\nrollout_id: int32 not null\nquestion_text: string not null\ngenerated_token_ids: list<element: int32 not null> not null\n  child 0, element: int32 not null\nn_generated_text_tokens: int32 not null\nhit_max_new_tokens: bool not null\ngenerated_text: string not null\ngold_answer: string not null\nextracted_answer: string",
+      "arrow_metadata": {
+        "config_sha256": "d3136d45726a3dbcea6b831046ae56e71b8e275794a4cd7b8881e41b910fa2f5",
+        "format_version": "1",
+        "metric_definition": "full raw-logit vocabulary; logp=log_softmax(z)[y]; kl_u_p=-log(V)-mean(log_softmax(z)); natural logarithms",
+        "token_alignment": "one value per retained generated token, from its predicting forward pass; selected stop tokens excluded",
+        "rollout_id": "zero-based 0..31 within each sample",
+        "answer_extraction": "final literal boxed expression, balanced braces; no numeric fallback",
+        "model_id": "Qwen/Qwen2.5-3B-Instruct",
+        "model_revision": "aa8e72537993ba99e69dfaafa59ed015b17504d1",
+        "dataset_id": "DigitalLearningGmbH/MATH-lighteval",
+        "dataset_revision": "0530c78699ea5e8eb5530600900e1f328b48acad",
+        "run_config_json": "{\"answer_extraction\": \"final literal \\\\boxed{...}, balanced braces; preserve LaTeX; no numeric fallback\", \"attention_implementation\": \"flash_attention_2\", \"dataset\": \"math\", \"dataset_id\": \"DigitalLearningGmbH/MATH-lighteval\", \"dataset_revision\": \"0530c78699ea5e8eb5530600900e1f328b48acad\", \"dtype\": \"bfloat16\", \"max_new_tokens\": 2048, \"model_directory\": \"/home/city3/ATML-PA3-Task3/qwen25_3b_math/models/Qwen2.5-3B-Instruct\", \"model_id\": \"Qwen/Qwen2.5-3B-Instruct\", \"model_revision\": \"aa8e72537993ba99e69dfaafa59ed015b17504d1\", \"population\": 5000, \"question_suffix\": \"\\n\\nThink step by step inside <think> </think> tags, then give your final answer inside \\\\boxed{}.\", \"repetition_penalty\": 1.0, \"rollout_seed_algorithm\": \"SHA256 of UTF8 math|42|sample_id|rollout_id, first 8 bytes big-endian; NumPy PCG64\", \"rollout_seed_base\": 42, \"rollouts_per_sample\": 32, \"sample_count\": 1000, \"selection_algorithm\": \"numpy.default_rng(42).choice(5000,1000,replace=False); ascending source index\", \"selection_seed\": 42, \"selection_sha256\": \"35346720ba262f47fe76e8cb5f4760b8511c6dfdba06054b1bcc75c45a5c6f87\", \"source_sha256\": \"7dca8d6e41af88ecf82f2b5f36eb5530e083aaaa86ee325f62bd5c31535178c6\", \"split\": \"test\", \"system_message\": \"You are a helpful assistant.\", \"temperature\": 0.7, \"top_k\": 20, \"top_p\": 0.8}",
+        "row_count": "32000",
+        "pilot": "False",
+        "sample_id": "test:<zero-based row index in the pinned full test split>"
+      }
+    },
+    "qwen25-math/probability_metrics.parquet": {
+      "sha256": "48a492cd2c93bebfbd12b0b9df6a5783b611103e7a3cfefe010573ff6e200379",
+      "bytes": 155221097,
+      "rows": 32000,
+      "schema": "dataset: string not null\nsample_id: string not null\nrollout_id: int32 not null\nlogp: list<element: float> not null\n  child 0, element: float\nkl_u_p: list<element: float> not null\n  child 0, element: float",
+      "arrow_metadata": {
+        "config_sha256": "d3136d45726a3dbcea6b831046ae56e71b8e275794a4cd7b8881e41b910fa2f5",
+        "format_version": "1",
+        "metric_definition": "full raw-logit vocabulary; logp=log_softmax(z)[y]; kl_u_p=-log(V)-mean(log_softmax(z)); natural logarithms",
+        "token_alignment": "one value per retained generated token, from its predicting forward pass; selected stop tokens excluded",
+        "rollout_id": "zero-based 0..31 within each sample",
+        "answer_extraction": "final literal boxed expression, balanced braces; no numeric fallback",
+        "model_id": "Qwen/Qwen2.5-3B-Instruct",
+        "model_revision": "aa8e72537993ba99e69dfaafa59ed015b17504d1",
+        "dataset_id": "DigitalLearningGmbH/MATH-lighteval",
+        "dataset_revision": "0530c78699ea5e8eb5530600900e1f328b48acad",
+        "run_config_json": "{\"answer_extraction\": \"final literal \\\\boxed{...}, balanced braces; preserve LaTeX; no numeric fallback\", \"attention_implementation\": \"flash_attention_2\", \"dataset\": \"math\", \"dataset_id\": \"DigitalLearningGmbH/MATH-lighteval\", \"dataset_revision\": \"0530c78699ea5e8eb5530600900e1f328b48acad\", \"dtype\": \"bfloat16\", \"max_new_tokens\": 2048, \"model_directory\": \"/home/city3/ATML-PA3-Task3/qwen25_3b_math/models/Qwen2.5-3B-Instruct\", \"model_id\": \"Qwen/Qwen2.5-3B-Instruct\", \"model_revision\": \"aa8e72537993ba99e69dfaafa59ed015b17504d1\", \"population\": 5000, \"question_suffix\": \"\\n\\nThink step by step inside <think> </think> tags, then give your final answer inside \\\\boxed{}.\", \"repetition_penalty\": 1.0, \"rollout_seed_algorithm\": \"SHA256 of UTF8 math|42|sample_id|rollout_id, first 8 bytes big-endian; NumPy PCG64\", \"rollout_seed_base\": 42, \"rollouts_per_sample\": 32, \"sample_count\": 1000, \"selection_algorithm\": \"numpy.default_rng(42).choice(5000,1000,replace=False); ascending source index\", \"selection_seed\": 42, \"selection_sha256\": \"35346720ba262f47fe76e8cb5f4760b8511c6dfdba06054b1bcc75c45a5c6f87\", \"source_sha256\": \"7dca8d6e41af88ecf82f2b5f36eb5530e083aaaa86ee325f62bd5c31535178c6\", \"split\": \"test\", \"system_message\": \"You are a helpful assistant.\", \"temperature\": 0.7, \"top_k\": 20, \"top_p\": 0.8}",
+        "row_count": "32000",
+        "pilot": "False",
+        "sample_id": "test:<zero-based row index in the pinned full test split>"
+      }
+    },
+    "qwen25vl-mathvista/generations.parquet": {
+      "sha256": "dac12a7dc14baaa44e6c3ed8f8dfcf9d39b8493462c8a60ea162d0a66dda5435",
+      "bytes": 17098339,
+      "rows": 32000,
+      "schema": "dataset: string not null\nmodel: string not null\nsample_id: string not null\nrollout_id: int32 not null\nquestion_text: string not null\ngenerated_token_ids: list<element: int32 not null> not null\n  child 0, element: int32 not null\nn_generated_text_tokens: int32 not null\nhit_max_new_tokens: bool not null\ngenerated_text: string not null\ngold_answer: string not null\nextracted_answer: string",
+      "arrow_metadata": {
+        "export_format_version": "1",
+        "dataset": "mathvista",
+        "split": "testmini",
+        "model": "Qwen2.5-VL-3B-Instruct",
+        "model_id": "qwen2_5_vl_3b",
+        "model_revision": "local-qwen2.5-vl-3b-instruct",
+        "experiment_group_id": "checkpoint-1-4090-b2-extended-2048",
+        "run_id": "run-ab42af3666945b6b",
+        "sampling": "{\"name\": \"concentrated\", \"repetition_penalty\": 1.0, \"temperature\": 0.7, \"top_k\": 20, \"top_p\": 0.8}",
+        "max_new_tokens": "2048",
+        "join_key": "dataset,sample_id,rollout_id",
+        "rollout_id": "zero-based rollout_index; 0..31 within each sample",
+        "token_alignment": "list index i describes retained generated token i, predicted from prompt and tokens before i; stop tokens excluded",
+        "null_policy": "undefined or unavailable values remain null; IEEE infinity is preserved",
+        "export_date": "2026-10-19",
+        "table": "generations",
+        "n_generated_text_tokens": "final retained response length N"
+      }
+    },
+    "qwen25vl-mathvista/probability_metrics.parquet": {
+      "sha256": "c1c7a9b9724aa4930673c1bb5759d2d82bacc57f4a530a83f533e9d2d43102ac",
+      "bytes": 81118521,
+      "rows": 32000,
+      "schema": "dataset: string not null\nsample_id: string not null\nrollout_id: int32 not null\nlogp: list<element: float> not null\n  child 0, element: float\nkl_u_p: list<element: float> not null\n  child 0, element: float",
+      "arrow_metadata": {
+        "export_format_version": "1",
+        "dataset": "mathvista",
+        "split": "testmini",
+        "model": "Qwen2.5-VL-3B-Instruct",
+        "model_id": "qwen2_5_vl_3b",
+        "model_revision": "local-qwen2.5-vl-3b-instruct",
+        "experiment_group_id": "checkpoint-1-4090-b2-extended-2048",
+        "run_id": "run-ab42af3666945b6b",
+        "sampling": "{\"name\": \"concentrated\", \"repetition_penalty\": 1.0, \"temperature\": 0.7, \"top_k\": 20, \"top_p\": 0.8}",
+        "max_new_tokens": "2048",
+        "join_key": "dataset,sample_id,rollout_id",
+        "rollout_id": "zero-based rollout_index; 0..31 within each sample",
+        "token_alignment": "list index i describes retained generated token i, predicted from prompt and tokens before i; stop tokens excluded",
+        "null_policy": "undefined or unavailable values remain null; IEEE infinity is preserved",
+        "export_date": "2026-10-19",
+        "table": "probability_metrics",
+        "distribution": "full-vocabulary raw logits; natural logarithms; no sampling transformations"
+      }
+    },
+    "qwen25vl-mathvista/attention_metrics.parquet": {
+      "sha256": "4f6cfce99519808c75f950e53c957795697d8b503a7fd407fcfdd260f06d0058",
+      "bytes": 138497144,
+      "rows": 32000,
+      "schema": "dataset: string not null\nsample_id: string not null\nrollout_id: int32 not null\nn_image_tokens: int32 not null\nn_prompt_text_tokens: int32 not null\nn_generated_text_tokens: list<element: int32 not null> not null\n  child 0, element: int32 not null\nimg_attn_total: list<element: float> not null\n  child 0, element: float\nprompt_text_attn_total: list<element: float> not null\n  child 0, element: float\ngenerated_text_attn_total: list<element: float> not null\n  child 0, element: float",
+      "arrow_metadata": {
+        "export_format_version": "1",
+        "dataset": "mathvista",
+        "split": "testmini",
+        "model": "Qwen2.5-VL-3B-Instruct",
+        "model_id": "qwen2_5_vl_3b",
+        "model_revision": "local-qwen2.5-vl-3b-instruct",
+        "experiment_group_id": "checkpoint-1-4090-b2-extended-2048",
+        "run_id": "run-ab42af3666945b6b",
+        "sampling": "{\"name\": \"concentrated\", \"repetition_penalty\": 1.0, \"temperature\": 0.7, \"top_k\": 20, \"top_p\": 0.8}",
+        "max_new_tokens": "2048",
+        "join_key": "dataset,sample_id,rollout_id",
+        "rollout_id": "zero-based rollout_index; 0..31 within each sample",
+        "token_alignment": "list index i describes retained generated token i, predicted from prompt and tokens before i; stop tokens excluded",
+        "null_policy": "undefined or unavailable values remain null; IEEE infinity is preserved",
+        "export_date": "2026-10-19",
+        "table": "attention_metrics",
+        "attention_scenario": "all_layers_all_heads",
+        "attention_layers": "1..36 inclusive; all heads; arithmetic mean over layer-head pairs",
+        "n_generated_text_tokens": "per-token count of previously generated retained tokens: [0,1,...,N-1]"
+      }
+    }
+  },
+  "statistics": {
+    "math": {
+      "retained_tokens": 20742094,
+      "capped_rollouts": 523,
+      "null_extractions": 521
+    },
+    "mathvista": {
+      "retained_tokens": 8961703,
+      "capped_rollouts": 487,
+      "null_extractions": 3032
+    }
+  },
+  "database_sha256": "a1fcfcc3de98948fc81002a2f2094fbe9c8d82c963e0f45315e989424b231bfe",
+  "questions_per_dataset": 1000,
+  "supplied_readme_sha256": "737f834ff66a031e226149066d97b7c38919f5c2f196906a5de037a42ac87241",
+  "metadata_sha256": "ab0148dca9d401c31cc47f29b3826eec28a76ff155a1c0878d81e8daf0413480"
+}

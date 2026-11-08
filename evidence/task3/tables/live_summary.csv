@@ -1,0 +1,4 @@
+strategy,questions,accuracy,accuracy_low,accuracy_high,mean_input_tokens,mean_output_tokens,mean_retained_output_tokens,total_seconds,mean_seconds,peak_gpu_bytes,extraction_failure_rate,final_truncation_rate,any_truncation_rate,wrong_to_correct,correct_to_wrong,wrong_to_correct_rate,correct_to_wrong_rate
+long,50,0.62,0.48,0.76,108.38,679.96,678.96,2042.4073839392513,40.848147678785026,6396347904,0.0,0.0,0.0,2,3,0.1111111111111111,0.09375
+parallel,50,0.62,0.48,0.76,325.14,1834.14,1831.6,5510.517707783263,110.21035415566526,6372931072,0.14,0.14,0.28,0,1,0.0,0.03125
+refinement,50,0.68,0.54,0.82,836.38,1153.46,1151.6,3467.3020547763444,69.34604109552689,6496302592,0.02,0.02,0.12,2,0,0.1111111111111111,0.0

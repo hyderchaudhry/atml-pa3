@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "seed": 6304,
+  "datasets": [
+    "math",
+    "mathvista"
+  ],
+  "questions_per_dataset": 1000,
+  "rollouts_per_question": 32,
+  "development_questions": 200,
+  "evaluation_questions": 800,
+  "live_questions": 50,
+  "orders_per_question": 10,
+  "budgets": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "bootstrap": {
+    "resamples": 1000,
+    "unit": "question",
+    "averaging": "orders within question first"
+  },
+  "live": {
+    "model": "Qwen/Qwen2.5-3B-Instruct",
+    "revision_source": "supplied README.MD",
+    "batch_size": 1,
+    "weights": "float16",
+    "quantization": null,
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "repetition_penalty": 1.0,
+    "system": "You are a helpful assistant.",
+    "instruction": "Think step by step inside <think> </think> tags, then give your final answer inside \\boxed{}.",
+    "revision_instruction": "Review the solution above. Identify and correct any errors; if it is correct, retain its answer. Give your final answer inside \\boxed{}.",
+    "caps": {
+      "long": 3072,
+      "parallel": 1024,
+      "revision": 2048
+    },
+    "shared_initial": "parallel_0 reused by refinement; cost charged to both strategies"
+  },
+  "stopping": {
+    "checkpoints": [
+      4,
+      8,
+      16,
+      32
+    ],
+    "taus": [
+      0.5,
+      0.625,
+      0.75,
+      0.875,
+      1.0
+    ],
+    "gammas": [
+      0.0,
+      0.1,
+      0.25,
+      0.5
+    ],
+    "development_accuracy_tolerance": 0.01,
+    "fallback": "always32",
+    "selection": "lowest mean tokens, higher accuracy, smaller tau, smaller gamma"
+  },
+  "scoring": {
+    "math": "math-verify==0.8.0",
+    "mathvista": "released answer_type/choices/precision metadata",
+    "missing": "one NO_ANSWER group, always incorrect, retained in voting and cost",
+    "ties": "earliest supporting rollout in current order",
+    "rwc": "descending average rank",
+    "calibration": "current prefix pooled token KL, linear Q05/Q95, denominator >=1e-8"
+  },
+  "runtime": {
+    "offline": "per-question resumable work; compact arrays and vectorized reductions",
+    "live": "SDPA, KV cache, one frozen FP16 model, durable per-response checkpoints"
+  }
+}
