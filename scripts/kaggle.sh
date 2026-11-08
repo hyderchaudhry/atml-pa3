@@ -8,6 +8,7 @@ OUTPUT_DIR="${PA3_OUTPUT_DIR:-/kaggle/working/pa3}"
 VENV_DIR="$SCRATCH_DIR/venv"
 export HF_HOME="$SCRATCH_DIR/huggingface"
 export MPLCONFIGDIR="$SCRATCH_DIR/matplotlib"
+export MPLBACKEND=Agg
 export XDG_CACHE_HOME="$SCRATCH_DIR/cache"
 export PIP_NO_CACHE_DIR=1
 export TOKENIZERS_PARALLELISM=false

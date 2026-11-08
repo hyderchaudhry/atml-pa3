@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 import csv
+import os
+
+# Notebook kernels can export an inline backend unavailable in the CLI's venv.
+# Set this before importing matplotlib: import itself validates MPLBACKEND.
+os.environ["MPLBACKEND"] = "Agg"
 
 import matplotlib
 

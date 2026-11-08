@@ -113,6 +113,18 @@ Fill **`evidence/task1/qualitative/annotations.csv`** yourself: the manual requi
 
 If a command fails, read the error immediately above it. Fix that issue, then run the same command again. Do not delete checkpoints or re-prepare data to get past an error.
 
+**Matplotlib backend error at the tables/plots step:** an older launcher may inherit
+Kaggle's `module://matplotlib_inline.backend_inline` setting, which is unavailable
+in the isolated environment. Resume in the same session with:
+
+```python
+!env MPLBACKEND=Agg bash /kaggle/working/PA3/scripts/kaggle.sh run
+```
+
+Completed training, evaluations, diagnostics, and generations are reused. The
+current launcher and summary module select the file-rendering `Agg` backend
+automatically, including before Matplotlib is imported.
+
 **401 Unauthorized:** generate a fresh personal Write token and rerun cell 2, then cell 3. Valid authentication with a repository-permission error means the token needs write access to the selected private dataset/namespace. [HF token roles](https://huggingface.co/docs/hub/security-tokens) explain the permissions. If you already load a valid `HF_TOKEN` from Kaggle Secrets, use `%run /kaggle/working/PA3/scripts/kaggle_auth.py --from-env` to validate it without entering it again.
 
 If an older clone stops with **Use Python 3.10-3.12**, run this recovery cell. The clone cell above now updates an existing checkout too.
