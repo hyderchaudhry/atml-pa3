@@ -5,12 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "atml-pa3"
 version = "0.1.0"
-description = "Original, reproducible implementation of ATML PA3 Task 1"
+description = "Original, reproducible implementations of ATML PA3 Tasks 1 and 2"
 requires-python = ">=3.10,<3.13"
 dynamic = ["dependencies"]
 
 [project.scripts]
 atml-task1 = "atml.task1.cli:main"
+atml-task2 = "atml.task2.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

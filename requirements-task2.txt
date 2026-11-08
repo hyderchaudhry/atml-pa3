@@ -1,0 +1,9 @@
+# Provider-independent Task 2 environment. No PEFT or third-party VLM trainer.
+torch==2.6.0
+transformers==4.51.3
+tokenizers==0.21.4
+huggingface-hub==0.30.2
+numpy==2.2.5
+matplotlib==3.10.1
+Pillow==11.2.1
+filelock==3.18.0

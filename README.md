@@ -1,208 +1,128 @@
-# ATML PA3
+# ATML PA3 — Task 2 on an RTX 4090
 
-Task 1 is implemented. Tasks 2 and 3 are intentionally not implemented. The training loop, LoRA/OPLoRA layers, data selection, diagnostics, and evidence pipeline were written for this repository; no public assignment solution or third-party fine-tuning implementation was copied. PyTorch, Transformers, Datasets, and the required lm-evaluation-harness provide library functionality. PEFT is installed because the harness imports it, but this implementation does not use it for adapters.
+Task 2 is implemented with original visual-interface, LoRA, curriculum training, decoding, scoring and recovery code. The [assignment manual](ATML-PA3.pdf) is the source of truth. PyTorch and Transformers supply tensor operations and pretrained architectures; no external VLM trainer, PEFT adapter implementation or public assignment solution is used.
 
-**Task 1 experiments are complete.** The imported Kaggle evidence in [evidence/task1](evidence/task1) contains all five training runs, seven evaluation conditions across four full benchmark splits, six trained-condition diagnostics, 168 qualitative responses, and the required tables and plots. The [saved completeness audit](evidence/task1/completeness.json) passes every computational check; the 42 human annotations remain pending. The assignment's PDF report and qualitative interpretation must be written by you, consistent with its AI usage policy.
+The main run uses **196 SigLIP patch tokens**, original **Qwen3-0.6B**, and **4,500 applied optimizer updates** across three stages. Training stays **microbatch 8 × accumulation 2**; final greedy generation stays **batch 8**, as prescribed. Checkpoints save every **250 updates**, with verified private Hugging Face backups and automatic resume.
 
-**Kaggle:** follow the [copy-and-paste guide](docs/kaggle.md): clone/install, set your backup name, then run `bash scripts/kaggle.sh run`. The launcher downloads the assignment-linked questions, chooses the remaining steps, and restores saved progress automatically. No notebook files or attached input datasets are needed for Task 1, and the training/evaluation recipe stays fixed.
+**Status:** all 15 offline synthetic smoke-test groups pass; real Task 2 training has not run. GPU runtime, peak memory, full FP16 behavior and real-data selection must be validated on your rented machine. Smoke fixtures and outputs are automatically deleted. Task 1's completed evidence remains in [evidence/task1](evidence/task1); its 42 human annotations remain pending. Task 3 is not implemented.
 
-The [ordered Task 1 checklist](docs/task1_execution.md) provides exact commands for
-all five training variants, seven benchmark/qualitative conditions, six diagnostic
-conditions and every expected output path. The [implementation audit](docs/task1_audit.md)
-records the manual review, fixes, verification and execution status.
+## 1. Set up Vast or RunPod
 
-Evaluation now defaults to **batch 32**, with padding-aware per-example token
-evidence, independent stock stopping, SDPA attention, KV caching and resumable
-request journals. Likelihood scoring projects only continuation hidden states in
-bounded chunks and shares identical prefixes, retaining the harness's tokenization
-and scoring semantics. Training remains **microbatch 2 × accumulation 16**.
-Measured Kaggle training resources and benchmark scores are saved in
-[resources.csv](evidence/task1/tables/resources.csv) and
-[benchmarks.csv](evidence/task1/tables/benchmarks.csv). No comparative GPU speedup was measured.
+Use a Linux RTX 4090 machine with 24 GB VRAM, a CUDA 12.4-compatible NVIDIA driver, CPython 3.10–3.12 (3.11 recommended), Internet access, and persistent storage. Allow approximately **40 GB free disk and 32 GB host RAM** as an operating allowance. Choose a persistent mount using your provider's storage settings; the directory name alone does not establish persistence.
 
-Kaggle setup selects an installed CPython 3.10–3.12 or uses uv to install isolated Python 3.11 under scratch space when the notebook's default Python is newer. It leaves the notebook kernel and pinned experiment dependencies unchanged.
-
-## Install
-
-Use Python 3.10–3.12 (3.11 recommended), a CUDA-capable NVIDIA GPU, and persistent storage. CPU/MPS is deliberately rejected for prescribed experiments: the manual requires FP16 CUDA AMP with dynamic gradient scaling. Full FT needs substantial GPU memory; all four recovery checkpoints retain optimizer state, so allow substantial disk space (roughly 100 GB for the complete pipeline, plus caches). Actual usage is logged.
+In the **cloud terminal**:
 
 ```bash
-python3.11 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -e .
-export HF_HOME="$PWD/artifacts/hf-cache"
-export MPLCONFIGDIR="$PWD/artifacts/matplotlib-cache"
-export TOKENIZERS_PARALLELISM=false
-atml-task1 protocol
-atml-task1 smoke
+git clone https://github.com/hyderchaudhry/atml-pa3.git
+cd atml-pa3
+
+export PA3_ROOT=/workspace/pa3-task2
+export PA3_TASK2_BACKUP_REPO=hyderchaudhry/atml-pa3-task2
+
+bash scripts/cloud-task2.sh setup
+bash scripts/cloud-task2.sh auth
+bash scripts/cloud-task2.sh doctor
+bash scripts/cloud-task2.sh smoke
 ```
 
-Dependencies are pinned in [requirements.txt](requirements.txt). Each preparation, training run, and evaluation also saves the installed package versions, platform/GPU details, source hashes, and Git revision. Model and dataset commit revisions are resolved once during preparation and reused. Keep one environment for all five variants and seven evaluation conditions.
+Use your own writable Hugging Face namespace if different. `auth` requests a Write token through a hidden terminal prompt and creates no token-containing evidence. The backup is a **private dataset**, separate from Task 1. If `python3.11` is unavailable but another supported interpreter exists, set `PA3_PYTHON`, e.g. `export PA3_PYTHON=python3`, before setup. The script creates an isolated environment on the persistent disk.
 
-## Supply the qualitative prompts
-
-The manual links the [original question dataset](https://github.com/emergent-misalignment/emergent-misalignment/blob/main/evaluation/first_plot_questions.yaml). Fetch it directly; the Kaggle launcher does this automatically:
+## 2. Prepare and inspect labels
 
 ```bash
-atml-task1 fetch-prompts
+bash scripts/cloud-task2.sh prepare
+bash scripts/cloud-task2.sh features
+bash scripts/cloud-task2.sh backup
 ```
 
-The exact YAML bytes and source URL/SHA-256 are saved under `evidence/task1`. Its native `id`, `paraphrases`, and optional `system` fields are supported, including the JSON-format system instructions. Only the supplied question data is used; its external judge settings/code are not used. Your annotations remain human-written.
+The code selects official COCO/VQAv2 records with seed 6304, saves all IDs and fixed image controls, downloads only selected images, and caches frozen FP16 SigLIP patches. Open/download:
 
-If you already have the file, you can import it instead:
+```text
+/workspace/pa3-task2/evidence/task2/grounding_labels.html
+/workspace/pa3-task2/evidence/task2/grounding_review.csv
+```
+
+Inspect annotation-derived labels independently of model predictions, especially omitted objects and ambiguous counts. Fill `label_checked` and `notes` in the CSV; write `none` for no issue. Investigate problems before training. The audit tracks human inspection separately and never invents completed judgments.
+
+## 3. Run the experiment
+
+Use `tmux` to survive SSH disconnects:
 
 ```bash
-atml-task1 import-prompts /absolute/path/to/first_plot_questions.yaml
+tmux new -s pa3-task2
+# From the repository directory, inside tmux:
+export PA3_ROOT=/workspace/pa3-task2
+export PA3_TASK2_BACKUP_REPO=hyderchaudhry/atml-pa3-task2
+set -o pipefail
+bash scripts/cloud-task2.sh run 2>&1 | tee -a "$PA3_ROOT/task2-run.log"
 ```
 
-The importer also accepts a list of 24 records with `question_id`, `format`, and `prompt` fields (plus optional `system`), or a mapping whose `plain`, `json`, and `template` keys each contain eight prompt strings in matching question order. It preserves the original YAML and its SHA-256 hash. Prompts are never invented or rewritten.
+Detach with **Ctrl-B, then D**. Reattach with `tmux attach -t pa3-task2`. The workflow runs calibration, initial development evaluation, the complete curriculum, all scheduled development evaluations, final four-condition evaluation, and summary/export. It prints every applied update and checkpoint path.
 
-If the supplied YAML uses another layout, make a separate JSON mapping with 24 entries. Each entry identifies the existing prompt's path within the YAML and gives its underlying question ID and format. For example, if `questions[0].plain` contains a prompt, its mapping entry is:
+RTX 4090 throughput optimizations include SDPA attention, selective gradient checkpointing that retains expensive matrix products, response-only vocabulary projection, a VRAM-budgeted frozen-feature cache, development likelihood batches of 32, KV-cache greedy decoding, and feature-extraction batches starting at 512 with OOM fallback. Feature residency uses up to 25% of VRAM while reserving 12 GiB for model work. Training and final-generation batch sizes remain fixed by the manual. Actual utilization and peak memory are measured during the real run; no speedup is claimed from local CPU tests.
 
-```json
-{"path": ["questions", 0, "plain"], "question_id": "0", "format": "plain"}
-```
+## 4. Resume or check progress
 
-Put the entries in an array, preserve the supplied plain-question order, and import:
+After an interruption, run the **same command**:
 
 ```bash
-atml-task1 import-prompts /path/to/first_plot_questions.yaml --prompt-map /path/to/prompt_map.json
+bash scripts/cloud-task2.sh run
 ```
 
-This explicitly identifies the first and last questions used for the 42-response annotation subset without guessing the source file's structure.
-
-## Run Task 1
-
-For the complete pipeline, after importing the YAML:
+It resumes the last committed checkpoint and finishes any missing due development evaluation before advancing. On a fresh disk, it automatically restores the published private backup. Keep the same Git revision and environment.
 
 ```bash
-atml-task1 run
+bash scripts/cloud-task2.sh next
+bash scripts/cloud-task2.sh audit
+bash scripts/cloud-task2.sh backup
+# Explicit restore into a fresh experiment root:
+bash scripts/cloud-task2.sh restore
 ```
 
-The command prepares data and fixed probes, computes bases and starting activations, evaluates the shared baseline, trains the five variants independently, evaluates the six required trained conditions, runs diagnostics and qualitative generation, and produces tables and figures. It prints training progress, microbatch progress every four microbatches, losses, learning rates, skipped updates, elapsed time, ETA, and checkpoint locations. Prints are flushed for remote logs. ETA estimates training time and excludes future checkpoint/evaluation work. Use staged commands through the Kaggle wrapper when session/storage limits apply.
+A checkpoint contains connector/adapters, optimizer, scheduler position, dynamic scaler, sampler position/permutation/RNG, global RNG, stage progress, training history, mixture counts and resource measurements. SHA-256 receipts protect local files. Remote inventories reference verified immutable commits. Failed uploads leave local checkpoints intact. No checkpoint is automatically deleted. A destroyed disk recovers through the last successfully published inventory.
 
-The same stages can be run separately:
+## 5. Download results
+
+The completed workflow prints:
+
+```text
+/workspace/pa3-task2/task2-evidence.zip
+```
+
+To recreate it:
 
 ```bash
-atml-task1 prepare
-atml-task1 bases
-atml-task1 cache-probes
-atml-task1 evaluate --condition baseline
-atml-task1 qualitative --condition baseline
-
-atml-task1 train --method full_ft
-atml-task1 train --method l2sp
-atml-task1 train --method lora4
-atml-task1 train --method lora16
-atml-task1 train --method oplora16
-
-atml-task1 evaluate --condition all
-atml-task1 diagnose --condition all
-atml-task1 qualitative --condition all
-atml-task1 summarize
-atml-task1 audit
+bash scripts/cloud-task2.sh summarize
+bash scripts/cloud-task2.sh export
 ```
 
-`evaluate` skips completed conditions and completed benchmark splits; the unchanged
-baseline is evaluated only once. An interrupted split replays its completed request
-journal and runs only missing requests, then computes stock metrics over the full
-split. Qualitative generation resumes from saved prompts. `diagnose --condition all`
-handles the six trained conditions; the baseline has no update diagnostic.
-
-The seven condition names are `baseline`, `full_ft_midpoint`, `full_ft_final`, `l2sp_final`, `lora4_final`, `lora16_final`, and `oplora16_final`. You may select one with `--condition`.
-
-### Recovery and persistent storage
-
-Checkpoints are saved at updates 312, 625, 937, and 1250 (9,984; 20,000; 29,984; 40,000 examples). Each contains model/adapter parameters, AdamW state, analytical scheduler position/next LR, scaler state, Python/NumPy/PyTorch/CUDA RNG state, and data position. Adapter checkpoints also contain projected inference factors. Checkpoints are first written to `.incomplete` directories and renamed after all writes finish.
+Download that absolute path using the provider's file browser, or run **on your local computer**:
 
 ```bash
-atml-task1 train --method full_ft --resume artifacts/task1/checkpoints/full_ft/update_0625
+scp -P YOUR_SSH_PORT root@YOUR_SSH_HOST:/workspace/pa3-task2/task2-evidence.zip .
+unzip task2-evidence.zip -d evidence
 ```
 
-Resume revalidates the fixed protocol, starting assets, and prepared-data manifest.
-Any training log tail after the checkpoint is archived and removed atomically from
-the active learning curve. An interrupted `.incomplete` serialization is discarded
-when retrying that save; complete checkpoints are never overwritten. With
-`--resume-latest`, an interruption before the first checkpoint preserves the attempt's
-curve and restarts from the original seed because no optimizer state was saved yet.
-Existing runs retain their recorded attention backend, including eager attention
-for checkpoints from the earlier implementation.
+The ZIP's `task2/` directory becomes **`evidence/task2/`** beside existing Task 1 evidence. It includes raw per-example results, tables, plots, image worksheets and the completeness audit. Model recovery checkpoints stay in the private backup and can be downloaded with `restore`.
 
-Run `atml-task1 smoke` locally or `!bash scripts/kaggle.sh smoke --cuda` on Kaggle.
-The offline synthetic checks use tiny random models and artificial inputs, clean
-their fixtures automatically, and save only `evidence/task1/system/smoke.json`.
-This evidence verifies implementation behavior; it is not experimental evidence.
-The separate `memory-check` command checks the real model's maximum-length memory
-on your GPU without retaining its synthetic training step.
+Important output paths under `$PA3_ROOT`:
 
-AMP overflow now retries the same effective batch with its reduced scale and
-restored dropout RNG, so checkpoints count applied updates. If an older run already
-advanced past skipped updates, it must be restarted to meet the exact 1,250-update
-budget. Its saved evidence should be retained separately; the new audit detects
-the shortfall instead of treating it as a complete experiment.
-
-`run` resumes the latest complete recovery checkpoint automatically and skips completed final runs. It does not delete or overwrite complete checkpoints. Keep both `artifacts/task1` and `evidence/task1` on persistent storage, especially on a rented GPU or notebook runtime. To use another location, put global options **before** the subcommand, consistently on every command:
-
-```bash
-atml-task1 --artifacts /persistent/pa3/artifacts/task1 --evidence /persistent/pa3/evidence/task1 run
-```
-
-Prepared data and large model/optimizer artifacts are ignored by Git. Small evidence files are not ignored. Back up large artifacts separately; retaining them is necessary for recovery and reproducible diagnostics. The Kaggle wrapper verifies private Hub copies before freeing local checkpoints and restores them on demand. Do not commit raw datasets or unnecessary checkpoints to the public repository.
-
-## Protocol details
-
-The authoritative settings are in [config.py](src/atml/task1/config.py), also exported to [configs/task1.json](configs/task1.json). There are no reduced-data or alternative-precision production switches.
-
-| Item | Implementation |
+| Path | Purpose |
 | --- | --- |
-| Starting point | Post-trained `Qwen/Qwen3-0.6B`, immutable revision, seed 6304; thinking disabled in chat formatting |
-| Training data | First 40,000 eligible MetaMathQA training records in source order; no shuffle or answer truncation |
-| Leakage filter | Both `query` and `original_question` compared against all GSM8K test questions after NFKC, casefold, punctuation/whitespace removal |
-| Length and loss | Entire formatted example ≤2,048 tokens; response and end-of-turn supervised; prompt, trailing template newline, and padding masked |
-| Accumulation | Microbatch 2 × 16; summed response CE divided by the total valid response tokens across all 32 examples |
-| Optimizer | AdamW (0.9, 0.999), epsilon 1e-8; decay 0.01 excluding biases and tensors with fewer than two dimensions |
-| Schedule | One epoch, 1,250 effective batches, 38 warmup updates then cosine; global clipping at 1.0 after unscaling |
-| Precision | FP16 AMP and dynamic scaler; FP32 Full FT master parameters, FP32 adapter parameters and optimizer moments; frozen FP16 adapter backbones; gradient checkpointing |
-| Full FT / L2-SP | Peak LR 2e-5; λ=0 / 1e-3; exact unaveraged half-sum over unique parameters, including bias/norm and tied weights once |
-| L2-SP storage | Fixed CPU FP32 reference; tensor-at-a-time transfer; exact scaled penalty gradients added once per effective batch before unscale/clip; storage and transfer/penalty overhead recorded |
-| LoRA | (rank, alpha) = (4,8), (16,32); LR 2e-4; dropout 0.05; random A/zero B; seven specified projections in every layer, no trainable biases |
-| OPLoRA | Rank 16, alpha 32, k=128; identical unprojected factors to LoRA-16; exact FP32 starting-weight SVD, factor projections, projected inference export |
-| Quantitative evaluation | Complete stock harness splits, zero-shot, FP16/eval mode; GSM8K chat/greedy/1,024 tokens and stock stops/filters; completion prompts for the other three tasks |
-| Diagnostics | Shared original FP32 bases; down_proj layers 0/13/27; FP32 local updates on 32 math + 32 non-math fixed baseline prompt activations |
-| Qualitative | All 24 supplied prompts × seven conditions, greedy, thinking disabled, cap 512 tokens; first/last underlying questions form the fixed 42-response worksheet |
+| `artifacts/task2/checkpoints/update_XXXX/` | Complete recovery state and separate connector/adapter weights |
+| `evidence/task2/selection.json` | Fixed data IDs, references, complementary pairs and mismatch mapping |
+| `evidence/task2/training.jsonl` | Applied-update losses, sampled mixture, learning rates, AMP retries and timing |
+| `evidence/task2/development/` | Scheduled caption/reference-likelihood evidence |
+| `evidence/task2/final/` | Original references, input-image controls, raw greedy tokens/text, NLL and timings |
+| `evidence/task2/tables/` | Suite/type/condition results, pair diagnostics, 4,000-pair bootstrap intervals and resources |
+| `evidence/task2/plots/learning_curves.png` | Training/development curves with stage boundaries |
+| `evidence/task2/qualitative.html` | Aligned image examples selected independently of results |
+| `evidence/task2/completeness.json` | Computational checks and outstanding human inspection |
 
-If FP16 overflow skips an optimizer attempt, the same effective batch is retried with a reduced scale and restored dropout RNG. Data and scheduler positions advance only after a successful optimizer step. `successful_updates` and `skipped_updates` record applied updates and skipped attempts separately.
+## Implementation and verification
 
-The L2-SP penalty is evaluated before each update, matching that update's SFT loss. Full-model displacement is measured after the required updates. A zero weight update has undefined `rho` and is recorded as JSON `null` with `zero_update=true`. Adapter diagnostics use exported FP32 projected factors before FP16 merge rounding. Merged/unmerged logits are checked on a small two-prompt batch using fixed FP16 tolerances recorded alongside actual maximum and mean errors.
+See the [manual requirements map](docs/task2_requirements.md) and [detailed cloud guide](docs/cloud_task2.md) for implementation choices, backup semantics and all output paths. Pinned Task 2 dependencies are in [requirements-task2.txt](requirements-task2.txt); source is under [src/atml/task2](src/atml/task2).
 
-The response loss uses checkpointed vocabulary-head chunks of 256 supervised tokens to bound peak memory; its objective and gradients match full-logit response-only CE up to floating-point summation. Training segments stop only at the specified recovery boundaries; resuming preserves the full 40,000-example/1,250-update recipe. `evaluate --benchmark TASK` runs one complete split and publishes the condition summary after all four have completed.
+Offline smoke tests use randomly initialized tiny models and synthetic data. They cover loss/gradient equivalence, frozen parameters, adapters, masks/positions, generation, vision normalization, data isolation, paired sampling, optimizer/RNG recovery, upload/checksum failure handling, final scoring, summaries and ZIP export. Temporary fixtures are removed on exit. Full experiments require CUDA and cannot silently fall back to CPU/MPS. Report interpretation and prose remain your work under the manual's AI policy.
 
-## Evidence and your remaining analysis
-
-All experiment evidence is written under `evidence/task1` by default:
-
-| Location | Saved evidence |
-| --- | --- |
-| `protocol.json`, `asset_lock.json`, `preparation.json` | Full settings, immutable asset revisions, filtering counts, prepared-data hashes |
-| `training_ids.json`, `probe_ids_and_prompts.json` | Retained source indices/hashes; exact 64 probe IDs and benchmark-formatted prompts |
-| `task_definitions.json`, `evaluation_splits.json` | Stock task definitions, complete split sizes/fingerprints, dataset revisions |
-| `runs/<method>/` | Per-update SFT/LR/objective/AMP/resource logs, complete environment, checkpoint inventories, required displacements |
-| `bases.json`, `activation_cache.json` | FP32 basis/probe-cache provenance, hashes, preprocessing/storage costs |
-| `evaluations/<condition>/` | Aggregate results and stock per-example scores, candidate likelihoods, extracted GSM8K answers, raw generation tokens/truncation flags, merge check |
-| `diagnostics/<condition>.json` | rho/eta and projection residuals at all three layers, all 64 local activation ratios and math/non-math summaries |
-| `qualitative/` | All 168 responses, grouping by question/format, exact prompts/tokens/truncation, 42-row annotation worksheet |
-| `tables/`, `figures/` | Seven-condition scores and percentage-point deltas, resource/regularization/diagnostic tables, combined learning curves and benchmark/regularization plots |
-| `completeness.json` | Explicit complete/missing evidence audit |
-
-After `summarize`, fill `qualitative/annotations.csv` yourself. It includes all 42 required responses and fields for format compliance, coherence/relevance, repetition, unnecessary mathematics, inappropriate content, short excerpts, and notes. Record your selection rule for aligned illustrative excerpts. `summarize` never overwrites an existing worksheet. Re-run `audit` afterward; it exits with status 1 while required evidence or annotations are incomplete.
-
-Use the saved tables and aligned responses to write your own controlled comparisons and interpretation: rank; Full FT versus L2-SP; LoRA-16 versus OPLoRA; Full FT versus LoRA-16; and Full FT midpoint versus final. Local activation ratios isolate local weight changes and do not establish causes of whole-model behavior. The code does not generate report language or subjective annotations.
-
-## Code layout and future tasks
-
-`src/atml/common/` contains task-independent persistence, provenance, and RNG utilities. `src/atml/task1/` separates configuration, data, adapter algebra, model loading, training, harness integration, evaluation, diagnostics, qualitative generation, and summaries. Future work can add `src/atml/task2/` and `src/atml/task3/` with their own CLI entry points and `artifacts/taskN` / `evidence/taskN` folders. They do not need to change Task 1's protocol or import its training loop.
-
-## Sources and authorship
-
-The assignment manual supplies the experimental specification. Mathematical background: [OPLoRA, Sections 3.2–3.3 and Proposition 2](https://arxiv.org/html/2510.13003v1), [LoRA](https://arxiv.org/abs/2106.09685), and [L2-SP](https://arxiv.org/abs/1802.01483). API references: [Qwen non-thinking chat formatting](https://qwen.readthedocs.io/en/stable/getting_started/quickstart.html), [Qwen3-0.6B model/tokenizer](https://huggingface.co/Qwen/Qwen3-0.6B), and [lm-evaluation-harness v0.4.9.1](https://github.com/EleutherAI/lm-evaluation-harness/tree/v0.4.9.1). These were consulted for formulas, required task definitions, and library interfaces; no external experiment implementation was pasted or adapted. Coding assistance from an LLM was used; you remain responsible for understanding submitted code under the manual's policy.
+For Task 1, use the [Kaggle guide](docs/kaggle.md), [execution checklist](docs/task1_execution.md), and [saved evidence](evidence/task1). Task 1 and Task 2 use separate output folders and backup repositories.
